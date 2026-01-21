@@ -3,3 +3,7 @@ Implementation of the swarmaltor model based on the paper Oscillators that sync 
 
 # Implementation
 ![alt text](image.png)
+
+# TO RUN
+uv venv 
+uv sync
