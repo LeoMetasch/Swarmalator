@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarmalator Interactive Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Swarmalator Simulation</h1>
+            <p class="subtitle">Interactive Phase-Coupled Oscillator Swarm Dynamics</p>
+        </header>
+
+        <main>
+            <div class="simulation-panel">
+                <canvas id="canvas" width="600" height="600"></canvas>
+                <div class="simulation-controls">
+                    <button id="playPauseBtn" class="btn btn-primary">
+                        <span id="playIcon">▶</span> Play
+                    </button>
+                    <button id="resetBtn" class="btn btn-secondary">↺ Reset</button>
+                    <span class="step-counter">Step: <span id="stepCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h2>Parameters</h2>
+
+                <div class="control-group">
+                    <label for="jSlider">
+                        J (Spatial Attraction)
+                        <span class="value-display" id="jValue">0.9</span>
+                    </label>
+                    <input type="range" id="jSlider" min="-1" max="1" step="0.05" value="0.9">
+                </div>
+
+                <div class="control-group">
+                    <label for="kSlider">
+                        K (Phase Coupling)
+                        <span class="value-display" id="kValue">0.0</span>
+                    </label>
+                    <input type="range" id="kSlider" min="-1" max="1" step="0.05" value="0">
+                </div>
+
+                <div class="control-group">
+                    <label for="nSlider">
+                        N (Particle Count)
+                        <span class="value-display" id="nValue">100</span>
+                    </label>
+                    <input type="range" id="nSlider" min="20" max="300" step="10" value="100">
+                </div>
+
+                <div class="control-group">
+                    <label for="dtSlider">
+                        dt (Time Step)
+                        <span class="value-display" id="dtValue">0.1</span>
+                    </label>
+                    <input type="range" id="dtSlider" min="0.01" max="0.3" step="0.01" value="0.1">
+                </div>
+
+                <h2>Mode Selection</h2>
+
+                <div class="control-group toggle-group">
+                    <label class="toggle">
+                        <input type="checkbox" id="chiralityToggle">
+                        <span class="toggle-slider"></span>
+                        Chirality
+                    </label>
+                </div>
+
+                <div class="control-group toggle-group">
+                    <label class="toggle">
+                        <input type="checkbox" id="phaseCouplingToggle">
+                        <span class="toggle-slider"></span>
+                        Phase Coupling (Q)
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label for="freqModeSelect">Frequency Mode</label>
+                    <select id="freqModeSelect">
+                        <option value="zero">Zero (ω = 0)</option>
+                        <option value="uniform">Uniform (ω = 1)</option>
+                        <option value="bimodal" selected>Bimodal (ω = ±1)</option>
+                        <option value="random">Random (ω ∈ [-1, 1])</option>
+                    </select>
+                </div>
+
+                <div class="presets">
+                    <h3>Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="btn btn-preset" data-preset="static">Static Sync</button>
+                        <button class="btn btn-preset" data-preset="phase-wave">Phase Wave</button>
+                        <button class="btn btn-preset" data-preset="chimera">Chimera</button>
+                        <button class="btn btn-preset" data-preset="chaos">Chaos</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="simulation.js"></script>
+</body>
+
+</html>
