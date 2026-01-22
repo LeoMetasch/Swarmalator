@@ -67,7 +67,7 @@ theta = np.random.uniform(-np.pi, np.pi, N)
 
 plt.ion()  # turn on interactive plotting
 
-steps = 500000
+steps = 5000
 
 for t in range(steps):
     x, y, theta = step(x, y, theta, dt, J, K)
@@ -83,3 +83,4 @@ for t in range(steps):
 
 plt.ioff()
 plt.show()
+
