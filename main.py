@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from src.swarmalator import Swarmalator
 
-N = 100
+N = 500
 J = 1 # spatial attraction strength
-K = -0.25  # phase coupling strength
+K = -0.01 # phase coupling strength
 dt = 0.1
 np.random.seed(1)
 eps = 1e-6

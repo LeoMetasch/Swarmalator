@@ -107,7 +107,7 @@ class Swarmalator:
         ############ Spatial velocity (V) ####################################
         dx = self.x - x_prev
         dy = self.y - y_prev
-        #Euclidean distance
+        # Euclidean distance
         V = np.sqrt(dx**2 + dy**2)
         V_mean = np.mean(V)
 
@@ -134,9 +134,10 @@ class Swarmalator:
             None
         Returns:
             state (str): stability state of the swarmalator system
-            S_parameter (float): correlation order parameter
-            V_parameter (float): mean spatial velocity
-            omega_parameter (float): mean phase velocity    
+            S_parameter (float): correlation order parameter s = 1 - each spatial position corresponds to a specific phase
+            V_parameter (float): mean spatial velocity V > 0 - swarmalators are moving
+            Omega_parameter (float): mean phase velocity omega > 0 - swarmalators are changing phases 
+            R_parameter (): The Synchrony Order Parameter R = 1 - all swarmalators have the same internal phase
         """
         x_prev, y_prev, theta_prev = self.x.copy(), self.y.copy(), self.theta.copy()
     
