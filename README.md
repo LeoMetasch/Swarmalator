@@ -7,3 +7,9 @@ Implementation of the swarmaltor model based on the paper Oscillators that sync 
 # TO RUN
 uv venv 
 uv sync
+.venv\Scripts\activate
+
+# Logging order parameters
+- Activate the virtualenv and run `python` on [main.py](main.py) to execute a sample experiment.
+- The script writes order-parameter snapshots to [logs/experiment_log.csv](logs/experiment_log.csv) with columns: step, S, V, omega, R, J, K, N.
+- Adjust parameters [main.py](main.py) (see `run_experiment`) as needed for custom sweeps.
