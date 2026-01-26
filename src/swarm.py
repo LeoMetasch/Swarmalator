@@ -627,4 +627,3 @@ class Swarm:
         
         plt.close(fig)
         print(f"Simulation complete. Video saved as {filename}")
-
