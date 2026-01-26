@@ -267,7 +267,50 @@ class Swarm:
 
         return lab.astype(np.int64)
 
-    
+    def _cluster_separation_score(
+        self,
+        x: NDArray[np.floating],
+        y: NDArray[np.floating],
+        labels: NDArray[np.integer],
+    ) -> float:
+        """
+        Measure spatial separation of label-defined groups.
+
+        Score = (mean inter-centroid distance) / (mean within-cluster spread).
+        Higher values indicate more clearly separated spatial lobes.
+
+        Args:
+            x: x-coordinates, shape (N,).
+            y: y-coordinates, shape (N,).
+            labels: Integer labels defining groups, shape (N,).
+
+        Returns:
+            separation: Dimensionless separation score (>= 0).
+        """
+        k = int(labels.max()) + 1
+        if k < 2:
+            return 0.0
+
+        pts = np.c_[np.asarray(x, dtype=float), np.asarray(y, dtype=float)]
+        cents = np.array([pts[labels == j].mean(axis=0) for j in range(k)])
+
+        # Within-cluster spread (mean distance to centroid)
+        spreads = []
+        for j in range(k):
+            pj = pts[labels == j]
+            if pj.shape[0] < 2:
+                continue
+            spreads.append(np.sqrt(((pj - cents[j]) ** 2).sum(axis=1)).mean())
+        within = float(np.mean(spreads)) if spreads else 0.0
+
+        # Between-centroid distances (mean pairwise distance)
+        d = []
+        for a in range(k):
+            for b in range(a + 1, k):
+                d.append(np.linalg.norm(cents[a] - cents[b]))
+        between = float(np.mean(d)) if d else 0.0
+
+        return between / (within + 1e-12)
 
     def stability_analysis(self):
         """
