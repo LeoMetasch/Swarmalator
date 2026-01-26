@@ -482,7 +482,7 @@ class Swarm:
         R_parameter = self._synchrony_order_parameter()
 
         best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
-            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1
+            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
         )
 
         # --- Static-ish states ---
