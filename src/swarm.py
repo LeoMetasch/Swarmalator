@@ -312,6 +312,37 @@ class Swarm:
 
         return between / (within + 1e-12)
 
+    def _phase_compactness(self, labels: NDArray[np.integer]) -> float:
+        """
+        Compute weighted within-cluster circular coherence of phases.
+
+        For each cluster j:
+            r_j = |mean(exp(i*theta_i))| over i in cluster j
+        The returned compactness is the size-weighted average of r_j across clusters.
+
+        Args:
+            labels: Integer cluster labels, shape (N,).
+
+        Returns:
+            compactness: Value in [0, 1]; higher means tighter phase groups within clusters.
+        """
+        k = int(labels.max()) + 1
+        N = int(labels.size)
+        if k < 1 or N == 0:
+            return 0.0
+
+        z = np.exp(1j * self.theta)
+        comp = 0.0
+        for j in range(k):
+            idx = labels == j
+            nj = int(idx.sum())
+            if nj == 0:
+                continue
+            rj = float(np.abs(z[idx].mean()))
+            comp += (nj / N) * rj
+        return float(comp)
+
+
     def stability_analysis(self):
         """
         Analyze the stability of the swarmalator system via the order parameters. 
