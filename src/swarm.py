@@ -217,6 +217,57 @@ class Swarm:
         omega_mean = np.mean(omega_i)
 
         return V_mean, omega_mean
+    
+    def _circular_kmeans_labels(
+        self,
+        theta: NDArray[np.floating],
+        k: int,
+        iters: int = 30,
+        seed: int = 0,
+    ) -> NDArray[np.int64]:
+        """
+        K-means clustering on phases (angles) using the embedding theta -> (cos theta, sin theta).
+
+        This avoids problems at the branch cut (e.g. -pi and +pi represent the same angle).
+
+        Args:
+            theta: Phase angles (radians), shape (N,).
+            k: Number of clusters.
+            iters: Maximum number of k-means iterations.
+            seed: Random seed for initialization.
+
+        Returns:
+            labels: Integer cluster labels in {0..k-1}, shape (N,).
+        """
+        rng = np.random.default_rng(seed)
+        X = np.c_[np.cos(theta), np.sin(theta)]  # (N,2) points on the unit circle
+
+        # Initialize: pick k random points as centers
+        cent = X[rng.choice(X.shape[0], size=k, replace=False)].copy()
+
+        for _ in range(iters):
+            # Assignment: squared distances to centers (N,k)
+            d2 = ((X[:, None, :] - cent[None, :, :]) ** 2).sum(axis=2)
+            lab = np.argmin(d2, axis=1)
+
+            # Update: mean direction per cluster, renormalized to unit length
+            new_cent = cent.copy()
+            for j in range(k):
+                pts = X[lab == j]
+                if pts.shape[0] == 0:
+                    new_cent[j] = X[rng.integers(0, X.shape[0])]
+                else:
+                    v = pts.mean(axis=0)
+                    n = np.linalg.norm(v)
+                    new_cent[j] = v / (n + 1e-12)
+
+            if np.allclose(new_cent, cent):
+                break
+            cent = new_cent
+
+        return lab.astype(np.int64)
+
+    
 
     def stability_analysis(self):
         """
