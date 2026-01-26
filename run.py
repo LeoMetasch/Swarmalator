@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from src.swarmalator import Swarmalator
+from src.swarm import Swarm
 
 
 def save_final_state(swarm, N, J, K, seed):
@@ -25,7 +25,7 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     y = np.random.uniform(-1.0, 1.0, N)
     theta = np.random.uniform(-np.pi, np.pi, N)
 
-    swarm = Swarmalator(N=N, x=x, y=y, theta=theta, J=J, K=K, dt=dt)
+    swarm = Swarm(N=N, x=x, y=y, theta=theta, J=J, K=K, dt=dt)
 
     R_vals = []
     S_vals = []
@@ -40,9 +40,11 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     R_mean = float(np.mean(R_vals))
     S_mean = float(np.mean(S_vals))
 
+    state = swarm.stability_analysis()
+
     save_final_state(swarm, N, J, K, seed)
 
-    return f"{N},{J},{K},{seed},{R_mean},{S_mean}"
+    return f"{N},{J},{K},{seed},{R_mean},{S_mean},{state}"
 
 
 def main():
@@ -52,7 +54,7 @@ def main():
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--dt", type=float, default=0.01)
-    p.add_argument("--steps", type=int, default=4000)
+    p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
     p.add_argument("--sample_every", type=int, default=10)
     p.add_argument("--sweep", action="store_true")
@@ -72,7 +74,7 @@ def main():
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
         Ks = np.linspace(args.Kmin, args.Kmax, args.Ksteps)
 
-        print("N,J,K,seed,R,S")
+        print("N,J,K,seed,R,S, state")
 
         for J in Js:
             for K in Ks:
@@ -80,7 +82,7 @@ def main():
                     print(run_once(args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every))
 
     else:
-        print("N,J,K,seed,R,S")
+        print("N,J,K,seed,R,S, state")
         print(run_once(args.N, args.J, args.K, args.seed, args.dt, args.steps, args.burnin, args.sample_every))
 
 
