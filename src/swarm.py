@@ -1,8 +1,11 @@
+from zipfile import Path
 from IPython.terminal.shortcuts.filters import preceding_text
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt
 from enum import Enum
+import csv
+from pathlib import Path
 
 class FrecMode(Enum):
     ZERO = "zero" # omega_i = 0 for all
@@ -163,7 +166,7 @@ class Swarm:
         self.x_pos += xdot * self.dt
         self.y_pos += ydot * self.dt
 
-    def correlation_order_parameter(self):
+    def _correlation_order_parameter(self):
         """
         Calculate the correlation order parameter S+-.
 
@@ -183,7 +186,7 @@ class Swarm:
         S_minus = np.abs(W_minus.sum()/self.N)
         return max(S_plus, S_minus)
 
-    def calculate_velocity_order_parameter(self, x_prev, y_prev, theta_prev):
+    def _calculate_velocity_order_parameter(self, x_prev, y_prev, theta_prev):
         """
         Calculate the mean spatial velocity (V) and mean phase velocity (Omega) order parameters by 
         calculating the difference between the current and previous state.
@@ -217,6 +220,10 @@ class Swarm:
         omega_mean = np.mean(omega_i)
 
         return V_mean, omega_mean
+    
+    def _synchrony_order_parameter(self):
+        """Calculate the Kuramoto order parameter R for the current phases."""
+        return float(np.abs(np.mean(np.exp(1j * self.theta))))
     
     def _circular_kmeans_labels(
         self,
@@ -468,8 +475,9 @@ class Swarm:
 
         self.time_step()
 
-        S_parameter = self.correlation_order_parameter()
-        V_parameter, omega_parameter = self.calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
+        S_parameter = self._correlation_order_parameter()
+        V_parameter, omega_parameter = self._calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
+        R_parameter = self._synchrony_order_parameter()
 
         best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
             k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
@@ -491,13 +499,66 @@ class Swarm:
             state = "Active Phase Wave"
 
         elif S_parameter <= 0.1:
-            R = float(np.abs(np.mean(np.exp(1j * self.theta))))
-            state = "Static Sync" if R > 0.9 else "Static Async"
+            state = "Static Sync" if R_parameter > 0.9 else "Static Async"
 
         else:
             state = "Transitioning"
 
         return state, float(S_parameter), float(V_parameter), float(omega_parameter), best_k, best_sep, best_comp, best_aniso
+   
+    def run_with_logging(self, steps, log_path, log_interval=1):
+        """
+        Run the simulation and append order parameters to a CSV log.
+
+        Args:
+            steps (int): Number of Euler steps to perform.
+            log_path (str | Path): Destination CSV file. Parent dirs are created when needed.
+            log_interval (int): Write every `log_interval` steps (1 = every step).
+        """
+        log_path = Path(log_path)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        fieldnames = ["step", "S", "V", "omega", "R", "J", "K", "N"]
+        is_new_file = not log_path.exists()
+
+        # snapshot of previous state for velocity-based metrics
+        prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
+
+        with log_path.open("a", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=fieldnames)
+            if is_new_file:
+                writer.writeheader()
+
+            # log initial state (step 0) with zero velocities
+            state0, S0, V0, omega0, R0 = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+            writer.writerow({
+                "step": 0,
+                "S": S0,
+                "V": V0,
+                "omega": omega0,
+                "R": R0,
+                "J": self.J,
+                "K": self.K,
+                "N": self.N,
+            })
+
+            for step_idx in range(1, steps + 1):
+                self.time_step()
+
+                if step_idx % log_interval == 0:
+                    state, S, V, omega, R = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+                    writer.writerow({
+                        "step": step_idx,
+                        "S": S,
+                        "V": V,
+                        "omega": omega,
+                        "R": R,
+                        "J": self.J,
+                        "K": self.K,
+                        "N": self.N,
+                    })
+
+                prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
 
     def simulate_video(
         self,
@@ -549,6 +610,6 @@ class Swarm:
         plt.close(fig)
         print(f"Simulation complete. Video saved as {filename}")
 
-swarm = Swarm(N=100, dt=0.1, J=0.9, K=0, steps=1000, chirality=True, freq_mode=FrecMode.BIMODAL, phase_coupling=True)
+swarm = Swarm(N=100, dt=0.6, J=0.9, K=0, steps=1000, chirality=True, freq_mode=FrecMode.BIMODAL, phase_coupling=True)
 swarm.simulate_video()
 
