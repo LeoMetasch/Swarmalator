@@ -93,10 +93,10 @@ def main():
     p.add_argument("--sweep", action="store_true")
     p.add_argument("--Jmin", type=float, default=0)
     p.add_argument("--Jmax", type=float, default=1.0)
-    p.add_argument("--Jsteps", type=int, default=25)
+    p.add_argument("--Jsteps", type=int, default=26)
     p.add_argument("--Kmin", type=float, default=-.8)
     p.add_argument("--Kmax", type=float, default=.2)
-    p.add_argument("--Ksteps", type=int, default=25)
+    p.add_argument("--Ksteps", type=int, default=26)
 
     args = p.parse_args()
 
