@@ -3,6 +3,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from src.swarm import Swarm
+import csv
+from pathlib import Path
 
 
 
@@ -17,8 +19,12 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
     plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
     plt.close()
 
+    log_path = Path(log_path)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state"]
     is_new_file = not log_path.exists()
+
+    
 
     with log_path.open("a", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
@@ -26,7 +32,7 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
             writer.writeheader()
 
         # log initial state (step 0) with zero velocities
-        state0, S0, V0, omega0, R0, best_k0, best_sep0, best_comp0, best_aniso0 = self.stability_analysis()
+        state0, S0, V0, omega0, R0, best_k0, best_sep0, best_comp0, best_aniso0 = swarm.stability_analysis()
         writer.writerow({
             "J": swarm.J,
             "K": swarm.K,
@@ -79,10 +85,10 @@ def main():
     p.add_argument("--J", type=float, default=0.0)
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--dt", type=float, default=0.01)
+    p.add_argument("--dt", type=float, default=0.1)
     p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
-    p.add_argument("--sample_every", type=int, default=10)
+    p.add_argument("--sample_every", type=int, default=100)
     p.add_argument("--sweep", action="store_true")
     p.add_argument("--Jmin", type=float, default=-1.0)
     p.add_argument("--Jmax", type=float, default=2.0)
