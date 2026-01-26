@@ -389,6 +389,65 @@ class Swarm:
         weights_arr /= weights_arr.sum()
         return float(np.dot(weights_arr, np.array(anisos, dtype=float)))
 
+    def splinter_diagnostics(
+        self,
+        k_min: int = 2,
+        k_max: int = 12,
+        min_frac: float = 0.05,
+        seed: int = 0,
+        k_penalty: float = 1.5,
+    ) -> Tuple[int, float, float, float, Optional[NDArray[np.int64]]]:
+        """
+        Diagnose whether phases form discrete groups that are also spatially separated.
+
+        This combines:
+          - spatial separation of phase-defined groups, and
+          - within-cluster phase compactness (circular coherence).
+
+        To reduce false positives (e.g. slicing a smooth phase wave into many groups), the
+        score penalizes large k and highly anisotropic (arc-like) spatial clusters.
+
+        Args:
+            k_min: Minimum number of phase clusters to evaluate.
+            k_max: Maximum number of phase clusters to evaluate.
+            min_frac: Minimum fraction of points required in each cluster (tiny clusters ignored).
+            seed: Random seed for clustering initialization.
+            k_penalty: Exponent controlling the penalty for large k in the score.
+
+        Returns:
+            best_k: Selected number of phase clusters.
+            best_sep: Spatial separation score (higher => clearer lobes).
+            best_comp: Phase compactness in [0, 1] (higher => tighter phase groups).
+            best_aniso: Spatial anisotropy (higher => more arc/filament-like).
+            labels: Cluster labels for best_k, or None if no valid clustering was found.
+        """
+        best = {"k": 1, "sep": 0.0, "comp": 0.0, "aniso": 0.0, "labels": None}
+        theta = self.theta
+
+        for k in range(int(k_min), int(k_max) + 1):
+            labels = self._circular_kmeans_labels(theta, k, seed=seed)
+
+            counts = np.bincount(labels, minlength=k)
+            if counts.min() < min_frac * theta.size:
+                continue
+
+            sep = self._cluster_separation_score(self.x, self.y, labels)
+            comp = self._phase_compactness(labels)
+            aniso = self._spatial_anisotropy(labels)
+
+            score = (sep * comp) / (k ** k_penalty) / (1.0 + aniso)
+            best_score = (best["sep"] * best["comp"]) / (max(best["k"], 1) ** k_penalty) / (1.0 + best["aniso"])
+            if score > best_score:
+                best = {"k": k, "sep": float(sep), "comp": float(comp), "aniso": float(aniso), "labels": labels}
+
+        return (
+            int(best["k"]),
+            float(best["sep"]),
+            float(best["comp"]),
+            float(best["aniso"]),
+            best["labels"].astype(np.int64) if best["labels"] is not None else None,
+        )
+
     def stability_analysis(self):
         """
         Analyze the stability of the swarmalator system via the order parameters. 
