@@ -7,3 +7,4 @@ Implementation of the swarmaltor model based on the paper Oscillators that sync 
 # TO RUN
 uv venv 
 uv sync
+.venv\Scripts\activate
