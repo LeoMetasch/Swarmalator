@@ -448,49 +448,56 @@ class Swarm:
             best["labels"].astype(np.int64) if best["labels"] is not None else None,
         )
 
-    def stability_analysis(self):
+    def stability_analysis(self) -> Tuple[str, float, float, float, int, float, float, float]:
         """
-        Analyze the stability of the swarmalator system via the order parameters. 
-        Eigenvalues require complex analysis, which is beyond the scope of this project.
-        Args:
-            None
+        Analyze the current system state using order parameters and diagnostics.
+
         Returns:
-            state (str): stability state of the swarmalator system
-            S_parameter (float): correlation order parameter s = 1 - each spatial position corresponds to a specific phase
-            V_parameter (float): mean spatial velocity V > 0 - swarmalators are moving
-            Omega_parameter (float): mean phase velocity omega > 0 - swarmalators are changing phases 
-            R_parameter (): The Synchrony Order Parameter R = 1 - all swarmalators have the same internal phase
+            state: Human-readable state label.
+            S_parameter: Correlation order parameter S.
+            V_parameter: Mean spatial velocity magnitude per step.
+            omega_parameter: Mean phase angular velocity magnitude (rad/time).
+            best_k: Best number of phase clusters (diagnostics).
+            best_sep: Spatial separation score of phase clusters.
+            best_comp: Within-cluster phase compactness (circular coherence).
+            best_aniso: Spatial anisotropy of phase clusters.
         """
-        x_prev, y_prev, theta_prev = self.x_pos.copy(), self.y_pos.copy(), self.phases.copy()
-    
-        # Perform a step
-        self.step()
+        x_prev = self.x.copy()
+        y_prev = self.y.copy()
+        theta_prev = self.theta.copy()
+
+        self.time_step()
 
         S_parameter = self.correlation_order_parameter()
         V_parameter, omega_parameter = self.calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
 
-        # Can't get the splintered phase wave to work
-        if S_parameter > 0.9 and V_parameter < 0.01 and omega_parameter < 0.01:
-            state = "Static Phase Wave" # High correlation, zero motion 
-        
-        elif S_parameter > 0.1 and V_parameter >= 0.01 and omega_parameter >= 0.01:
-            state = "Active Phase Wave" # Non-zero correlation AND non-zero motion 
-            
-        elif S_parameter > 0.1 and V_parameter < 0.01 and omega_parameter < 0.01:
-            state = "Splintered Phase Wave" # Non-zero correlation but ZERO motion 
-            
-        elif S_parameter <= 0.1:
-            # Distinguish between Async and Sync when correlation S is zero 
-            R = np.abs(np.mean(np.exp(1j * self.phases)))
-            if R > 0.9:
-                state = "Static Sync" # Zero correlation, High global synchrony 
+        best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
+            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
+        )
+
+        # --- Static-ish states ---
+        if V_parameter < 0.01 and omega_parameter < 0.01:
+            if S_parameter > 0.1:
+                if (best_sep > 3.0) and (best_comp > 0.85):
+                    state = f"Splintered Phase Wave (k={best_k})"
+                else:
+                    state = "Static Phase Wave"
             else:
-                state = "Static Async" # Zero correlation, Zero global synchrony 
-                
+                R = float(np.abs(np.mean(np.exp(1j * self.theta))))
+                state = "Static Sync" if R > 0.9 else "Static Async"
+
+        # --- Moving states ---
+        elif S_parameter > 0.1 and V_parameter >= 0.01 and omega_parameter >= 0.01:
+            state = "Active Phase Wave"
+
+        elif S_parameter <= 0.1:
+            R = float(np.abs(np.mean(np.exp(1j * self.theta))))
+            state = "Static Sync" if R > 0.9 else "Static Async"
+
         else:
             state = "Transitioning"
 
-        return state, S_parameter, V_parameter, omega_parameter
+        return state, float(S_parameter), float(V_parameter), float(omega_parameter), best_k, best_sep, best_comp, best_aniso
 
     def simulate_video(
         self,
