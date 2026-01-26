@@ -102,14 +102,10 @@ def main():
 
         print("N,J,K,seed,R,S, state")
 
-        outpath = "sweep.csv"
-        with open(outpath, "w") as f:
-            f.write("N,J,K,seed,R,S,state,S_param,V_param,omega_param\n")
-
-            for J in Js:
-                for K in Ks:
-                    for seed in seeds:
-                        print(run_once(args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every))
+        for J in Js:
+            for K in Ks:
+                for seed in seeds:
+                    print(run_once(args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every))
 
     else:
         print("N,J,K,seed,R,S, state")
