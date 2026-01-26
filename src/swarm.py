@@ -342,6 +342,52 @@ class Swarm:
             comp += (nj / N) * rj
         return float(comp)
 
+    def _spatial_anisotropy(self, labels: NDArray[np.integer]) -> float:
+        """
+        Compute weighted mean spatial anisotropy of clusters.
+
+        For each cluster, compute covariance eigenvalues (lmax, lmin) of (x, y) and define:
+            anisotropy = sqrt((lmax + tiny) / (lmin + tiny))
+
+        Blobs -> ~1, arcs/filaments -> large.
+
+        Args:
+            labels: Integer cluster labels, shape (N,).
+
+        Returns:
+            anisotropy: Weighted mean anisotropy across clusters.
+        """
+        k = int(labels.max()) + 1
+        N = int(labels.size)
+        if k < 1 or N == 0:
+            return 0.0
+
+        pts = np.c_[self.x, self.y]
+        anisos = []
+        weights = []
+        for j in range(k):
+            idx = labels == j
+            nj = int(idx.sum())
+            if nj < 3:
+                continue
+            pj = pts[idx]
+            cov = np.cov(pj.T)
+            try:
+                w = np.linalg.eigvalsh(cov)
+            except np.linalg.LinAlgError:
+                continue
+            lmin = float(np.min(w))
+            lmax = float(np.max(w))
+            aniso = float(np.sqrt((lmax + 1e-12) / (lmin + 1e-12)))
+            anisos.append(aniso)
+            weights.append(nj)
+
+        if not anisos:
+            return 0.0
+
+        weights_arr = np.array(weights, dtype=float)
+        weights_arr /= weights_arr.sum()
+        return float(np.dot(weights_arr, np.array(anisos, dtype=float)))
 
     def stability_analysis(self):
         """
