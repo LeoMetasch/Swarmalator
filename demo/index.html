@@ -16,14 +16,83 @@
         </header>
 
         <main>
-            <div class="simulation-panel">
-                <canvas id="canvas" width="600" height="600"></canvas>
-                <div class="simulation-controls">
-                    <button id="playPauseBtn" class="btn btn-primary">
-                        <span id="playIcon">▶</span> Play
-                    </button>
-                    <button id="resetBtn" class="btn btn-secondary">↺ Reset</button>
-                    <span class="step-counter">Step: <span id="stepCount">0</span></span>
+            <div class="left-column">
+                <div class="simulation-panel">
+                    <canvas id="canvas" width="600" height="600"></canvas>
+                    <div class="simulation-controls">
+                        <button id="playPauseBtn" class="btn btn-primary">
+                            <span id="playIcon">▶</span> Play
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary">↺ Reset</button>
+                        <span class="step-counter">Step: <span id="stepCount">0</span></span>
+                    </div>
+                    <div class="camera-controls">
+                        <div class="camera-row">
+                            <label class="zoom-label">
+                                Zoom: <span id="zoomValue">1.0</span>x
+                                <input type="range" id="zoomSlider" min="0.1" max="3" step="0.1" value="1">
+                            </label>
+                            <button id="resetCameraBtn" class="btn btn-small">⌂ Reset View</button>
+                        </div>
+                        <div class="camera-row">
+                            <label class="toggle toggle-small">
+                                <input type="checkbox" id="autoTrackToggle">
+                                <span class="toggle-slider"></span>
+                                Auto-track Swarm
+                            </label>
+                        </div>
+                        <p class="camera-hint">🖱️ Scroll to zoom • Click to spawn predator • Right-click to remove</p>
+                    </div>
+                </div>
+
+                <!-- Order Parameters Panel -->
+                <div class="order-parameters-panel">
+                    <div class="panel-header">
+                        <h2>Order Parameters</h2>
+                        <div class="state-indicator">
+                            <span class="state-label">State:</span>
+                            <span id="stateValue" class="state-badge">Initializing...</span>
+                        </div>
+                    </div>
+
+                    <div class="parameters-grid">
+                        <div class="parameter-card">
+                            <div class="parameter-header">
+                                <span class="parameter-name">S (Correlation)</span>
+                                <span class="parameter-value" id="sValue">0.00</span>
+                            </div>
+                            <canvas id="sPlot" width="280" height="80"></canvas>
+                            <p class="parameter-desc">Spatial-phase correlation (0 = uncorrelated, 1 = fully correlated)
+                            </p>
+                        </div>
+
+                        <div class="parameter-card">
+                            <div class="parameter-header">
+                                <span class="parameter-name">V (Spatial Velocity)</span>
+                                <span class="parameter-value" id="vValue">0.00</span>
+                            </div>
+                            <canvas id="vPlot" width="280" height="80"></canvas>
+                            <p class="parameter-desc">Mean spatial velocity of swarmalators</p>
+                        </div>
+
+                        <div class="parameter-card">
+                            <div class="parameter-header">
+                                <span class="parameter-name">Ω (Phase Velocity)</span>
+                                <span class="parameter-value" id="omegaValue">0.00</span>
+                            </div>
+                            <canvas id="omegaPlot" width="280" height="80"></canvas>
+                            <p class="parameter-desc">Mean phase (color) change rate</p>
+                        </div>
+
+                        <div class="parameter-card">
+                            <div class="parameter-header">
+                                <span class="parameter-name">R (Synchrony)</span>
+                                <span class="parameter-value" id="rValue">0.00</span>
+                            </div>
+                            <canvas id="rPlot" width="280" height="80"></canvas>
+                            <p class="parameter-desc">Global phase synchronization (1 = all same phase)</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -83,9 +152,9 @@
                 <div class="control-group">
                     <label for="freqModeSelect">Frequency Mode</label>
                     <select id="freqModeSelect">
-                        <option value="zero">Zero (ω = 0)</option>
+                        <option value="zero" selected>Zero (ω = 0)</option>
                         <option value="uniform">Uniform (ω = 1)</option>
-                        <option value="bimodal" selected>Bimodal (ω = ±1)</option>
+                        <option value="bimodal">Bimodal (ω = ±1)</option>
                         <option value="random">Random (ω ∈ [-1, 1])</option>
                     </select>
                 </div>
