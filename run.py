@@ -21,7 +21,7 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
 
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state"]
+    fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state", "seed"]
     is_new_file = not log_path.exists()
 
     
@@ -42,6 +42,7 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
             "omega": omega0,
             "R": R0,
             "state": state0,
+            "seed": seed,
         })
 
 
@@ -90,17 +91,17 @@ def main():
     p.add_argument("--burnin", type=int, default=2000)
     p.add_argument("--sample_every", type=int, default=100)
     p.add_argument("--sweep", action="store_true")
-    p.add_argument("--Jmin", type=float, default=-1.0)
-    p.add_argument("--Jmax", type=float, default=2.0)
-    p.add_argument("--Jsteps", type=int, default=21)
-    p.add_argument("--Kmin", type=float, default=-2.0)
-    p.add_argument("--Kmax", type=float, default=4.0)
-    p.add_argument("--Ksteps", type=int, default=21)
+    p.add_argument("--Jmin", type=float, default=0)
+    p.add_argument("--Jmax", type=float, default=1.0)
+    p.add_argument("--Jsteps", type=int, default=25)
+    p.add_argument("--Kmin", type=float, default=-.8)
+    p.add_argument("--Kmax", type=float, default=.2)
+    p.add_argument("--Ksteps", type=int, default=25)
 
     args = p.parse_args()
 
 
-    seeds = [0]
+    seeds = [0, 1, 2]
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
