@@ -481,13 +481,13 @@ class Swarm:
         V_parameter, omega_parameter = self._calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
         R_parameter = self._synchrony_order_parameter()
 
-        best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
-            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
-        )
-
+        best_k, best_sep, best_comp, best_aniso, _ = None, None, None, None, None
         # --- Static-ish states ---
         if V_parameter < 0.01 and omega_parameter < 0.01:
             if S_parameter > 0.1:
+                best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
+                    k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
+                )
                 if (best_sep > 3.0) and (best_comp > 0.85):
                     state = f"Splintered Phase Wave (k={best_k})"
                 else:
