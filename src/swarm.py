@@ -520,7 +520,7 @@ class Swarm:
         log_path = Path(log_path)
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
-        fieldnames = ["step", "S", "V", "omega", "R", "J", "K", "N"]
+        fieldnames = ["step", "S", "V", "omega", "R", "J", "K", "N", "state"]
         is_new_file = not log_path.exists()
 
         # snapshot of previous state for velocity-based metrics
@@ -542,6 +542,7 @@ class Swarm:
                 "J": self.J,
                 "K": self.K,
                 "N": self.N,
+                "state": state0,
             })
 
             for step_idx in range(1, steps + 1):
@@ -558,6 +559,7 @@ class Swarm:
                         "J": self.J,
                         "K": self.K,
                         "N": self.N,
+                        "state": state,
                     })
 
                 prev_x, prev_y, prev_theta = self.x_pos.copy(), self.y_pos.copy(), self.phases.copy()

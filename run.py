@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from src.swarm import Swarm
 
 
+
 def save_final_state(swarm, N, J, K, seed):
     os.makedirs("final_states", exist_ok=True)
 
@@ -30,21 +31,25 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     R_vals = []
     S_vals = []
 
-    for t in range(steps):
-        swarm.step()
+    # for t in range(steps):
+    #     swarm.step()
 
-        if t >= burnin:
-            R_vals.append(np.abs(np.mean(np.exp(1j * swarm.phases))))
-            S_vals.append(swarm._correlation_order_parameter())
+    #     if t >= burnin:
+    #         R_vals.append(np.abs(np.mean(np.exp(1j * swarm.phases))))
+    #         S_vals.append(swarm._correlation_order_parameter())
 
-    R_mean = float(np.mean(R_vals))
-    S_mean = float(np.mean(S_vals))
+    # R_mean = float(np.mean(R_vals))
+    # S_mean = float(np.mean(S_vals))
 
-    state = swarm.stability_analysis()
+    swarm.run_with_logging(steps=steps, log_path=f"logs/temp_N{N}_J{J}_K{K}_seed{seed}.csv", log_interval=sample_every)
+
+    state, S_parameter, V_parameter, omega_parameter, R_parameter, best_k, best_sep, best_comp, best_aniso = swarm.stability_analysis()
 
     save_final_state(swarm, N, J, K, seed)
+    # return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
 
-    return f"{N},{J},{K},{seed},{R_mean},{S_mean},{state}"
+
+    return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}"
 
 
 def main():
@@ -68,7 +73,7 @@ def main():
     args = p.parse_args()
 
 
-    seeds = [0, 1, 2]
+    seeds = [0]
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
@@ -76,10 +81,14 @@ def main():
 
         print("N,J,K,seed,R,S, state")
 
-        for J in Js:
-            for K in Ks:
-                for seed in seeds:
-                    print(run_once(args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every))
+        outpath = "sweep.csv"
+        with open(outpath, "w") as f:
+            f.write("N,J,K,seed,R,S,state,S_param,V_param,omega_param\n")
+
+            for J in Js:
+                for K in Ks:
+                    for seed in seeds:
+                        print(run_once(args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every))
 
     else:
         print("N,J,K,seed,R,S, state")
