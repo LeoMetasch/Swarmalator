@@ -8,7 +8,7 @@ from src.swarm import Swarm
 def save_final_state(swarm, N, J, K, seed):
     os.makedirs("final_states", exist_ok=True)
 
-    plt.scatter(swarm.x, swarm.y, c=swarm.theta, cmap='hsv')
+    plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
     plt.colorbar(label='Phase (theta)')
     plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
     plt.xlabel('x')
@@ -21,21 +21,21 @@ def save_final_state(swarm, N, J, K, seed):
 def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     np.random.seed(seed)
 
-    x = np.random.uniform(-1.0, 1.0, N)
-    y = np.random.uniform(-1.0, 1.0, N)
-    theta = np.random.uniform(-np.pi, np.pi, N)
+    # x = np.random.uniform(-1.0, 1.0, N)
+    # y = np.random.uniform(-1.0, 1.0, N)
+    # theta = np.random.uniform(-np.pi, np.pi, N)
 
-    swarm = Swarm(N=N, x=x, y=y, theta=theta, J=J, K=K, dt=dt)
+    swarm = Swarm(N=N, J=J, K=K, dt=dt, steps=steps, chirality=False, phase_coupling=False, predator=False)
 
     R_vals = []
     S_vals = []
 
     for t in range(steps):
-        swarm.time_step()
+        swarm.step()
 
         if t >= burnin:
-            R_vals.append(np.abs(np.mean(np.exp(1j * swarm.theta))))
-            S_vals.append(swarm.correlation_order_parameter())
+            R_vals.append(np.abs(np.mean(np.exp(1j * swarm.phases))))
+            S_vals.append(swarm._correlation_order_parameter())
 
     R_mean = float(np.mean(R_vals))
     S_mean = float(np.mean(S_vals))
