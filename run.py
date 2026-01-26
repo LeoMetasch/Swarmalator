@@ -1,6 +1,21 @@
 import argparse
 import numpy as np
+import os
+import matplotlib.pyplot as plt
 from src.swarmalator import Swarmalator
+
+
+def save_final_state(swarm, N, J, K, seed):
+    os.makedirs("final_states", exist_ok=True)
+
+    plt.scatter(swarm.x, swarm.y, c=swarm.theta, cmap='hsv')
+    plt.colorbar(label='Phase (theta)')
+    plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
+    plt.close()
+
 
 
 def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
@@ -22,12 +37,10 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
             R_vals.append(np.abs(np.mean(np.exp(1j * swarm.theta))))
             S_vals.append(swarm.correlation_order_parameter())
 
-            R_vals.append(R)
-            S_vals.append(S)
-
     R_mean = float(np.mean(R_vals))
     S_mean = float(np.mean(S_vals))
-    
+
+    save_final_state(swarm, N, J, K, seed)
 
     return f"{N},{J},{K},{seed},{R_mean},{S_mean}"
 
