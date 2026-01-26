@@ -6,7 +6,7 @@ from src.swarm import Swarm
 
 
 
-def save_final_state(swarm, N, J, K, seed):
+def save_final_state(swarm, N, J, K, seed, state, log_path):
     os.makedirs("final_states", exist_ok=True)
 
     plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
@@ -16,6 +16,27 @@ def save_final_state(swarm, N, J, K, seed):
     plt.ylabel('y')
     plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
     plt.close()
+
+    fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state"]
+    is_new_file = not log_path.exists()
+
+    with log_path.open("a", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        if is_new_file:
+            writer.writeheader()
+
+        # log initial state (step 0) with zero velocities
+        state0, S0, V0, omega0, R0, best_k0, best_sep0, best_comp0, best_aniso0 = self.stability_analysis()
+        writer.writerow({
+            "J": swarm.J,
+            "K": swarm.K,
+            "N": swarm.N,
+            "S": S0,
+            "V": V0,
+            "omega": omega0,
+            "R": R0,
+            "state": state0,
+        })
 
 
 
@@ -45,7 +66,7 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
 
     state, S_parameter, V_parameter, omega_parameter, R_parameter, best_k, best_sep, best_comp, best_aniso = swarm.stability_analysis()
 
-    save_final_state(swarm, N, J, K, seed)
+    save_final_state(swarm, N, J, K, seed, state, log_path="test.csv")
     # return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
 
 
