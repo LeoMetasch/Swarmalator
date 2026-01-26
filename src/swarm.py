@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import csv
 from pathlib import Path
+from numpy.typing import NDArray
+from typing import Optional, Tuple
 
 class FrecMode(Enum):
     ZERO = "zero" # omega_i = 0 for all
@@ -223,7 +225,7 @@ class Swarm:
     
     def _synchrony_order_parameter(self):
         """Calculate the Kuramoto order parameter R for the current phases."""
-        return float(np.abs(np.mean(np.exp(1j * self.theta))))
+        return float(np.abs(np.mean(np.exp(1j * self.phases))))
     
     def _circular_kmeans_labels(
         self,
@@ -338,7 +340,7 @@ class Swarm:
         if k < 1 or N == 0:
             return 0.0
 
-        z = np.exp(1j * self.theta)
+        z = np.exp(1j * self.phases)
         comp = 0.0
         for j in range(k):
             idx = labels == j
@@ -369,7 +371,7 @@ class Swarm:
         if k < 1 or N == 0:
             return 0.0
 
-        pts = np.c_[self.x, self.y]
+        pts = np.c_[self.x_pos, self.y_pos]
         anisos = []
         weights = []
         for j in range(k):
@@ -429,7 +431,7 @@ class Swarm:
             labels: Cluster labels for best_k, or None if no valid clustering was found.
         """
         best = {"k": 1, "sep": 0.0, "comp": 0.0, "aniso": 0.0, "labels": None}
-        theta = self.theta
+        theta = self.phases
 
         for k in range(int(k_min), int(k_max) + 1):
             labels = self._circular_kmeans_labels(theta, k, seed=seed)
@@ -438,7 +440,7 @@ class Swarm:
             if counts.min() < min_frac * theta.size:
                 continue
 
-            sep = self._cluster_separation_score(self.x, self.y, labels)
+            sep = self._cluster_separation_score(self.x_pos, self.y_pos, labels)
             comp = self._phase_compactness(labels)
             aniso = self._spatial_anisotropy(labels)
 
@@ -469,18 +471,18 @@ class Swarm:
             best_comp: Within-cluster phase compactness (circular coherence).
             best_aniso: Spatial anisotropy of phase clusters.
         """
-        x_prev = self.x.copy()
-        y_prev = self.y.copy()
-        theta_prev = self.theta.copy()
+        x_prev = self.x_pos.copy()
+        y_prev = self.y_pos.copy()
+        theta_prev = self.phases.copy()
 
-        self.time_step()
+        self.step()
 
         S_parameter = self._correlation_order_parameter()
         V_parameter, omega_parameter = self._calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
         R_parameter = self._synchrony_order_parameter()
 
         best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
-            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
+            k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1
         )
 
         # --- Static-ish states ---
@@ -491,7 +493,7 @@ class Swarm:
                 else:
                     state = "Static Phase Wave"
             else:
-                R = float(np.abs(np.mean(np.exp(1j * self.theta))))
+                R = float(np.abs(np.mean(np.exp(1j * self.phases))))
                 state = "Static Sync" if R > 0.9 else "Static Async"
 
         # --- Moving states ---
@@ -504,7 +506,7 @@ class Swarm:
         else:
             state = "Transitioning"
 
-        return state, float(S_parameter), float(V_parameter), float(omega_parameter), best_k, best_sep, best_comp, best_aniso
+        return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
    
     def run_with_logging(self, steps, log_path, log_interval=1):
         """
@@ -522,7 +524,7 @@ class Swarm:
         is_new_file = not log_path.exists()
 
         # snapshot of previous state for velocity-based metrics
-        prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
+        prev_x, prev_y, prev_theta = self.x_pos.copy(), self.y_pos.copy(), self.phases.copy()
 
         with log_path.open("a", newline="") as fh:
             writer = csv.DictWriter(fh, fieldnames=fieldnames)
@@ -530,7 +532,7 @@ class Swarm:
                 writer.writeheader()
 
             # log initial state (step 0) with zero velocities
-            state0, S0, V0, omega0, R0 = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+            state0, S0, V0, omega0, R0, best_k0, best_sep0, best_comp0, best_aniso0 = self.stability_analysis()
             writer.writerow({
                 "step": 0,
                 "S": S0,
@@ -543,10 +545,10 @@ class Swarm:
             })
 
             for step_idx in range(1, steps + 1):
-                self.time_step()
+                self.step()
 
                 if step_idx % log_interval == 0:
-                    state, S, V, omega, R = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+                    state, S, V, omega, R, best_k, best_sep, best_comp, best_aniso = self.stability_analysis()
                     writer.writerow({
                         "step": step_idx,
                         "S": S,
@@ -558,7 +560,21 @@ class Swarm:
                         "N": self.N,
                     })
 
-                prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
+                prev_x, prev_y, prev_theta = self.x_pos.copy(), self.y_pos.copy(), self.phases.copy()
+                     
+    def animate(self, steps):
+        plt.ion()
+        for t in range(steps):
+            self.step()
+            if t % 50 == 0:
+                plt.clf()
+                plt.scatter(self.x_pos, self.y_pos, c=self.phases, cmap="hsv")
+                plt.xlim(-6, 6)
+                plt.ylim(-6, 6)
+                plt.title(f"J={self.J}, K={self.K}, t = {t}")
+                plt.pause(0.01)
+        plt.ioff()
+        plt.show()
 
     def simulate_video(
         self,
@@ -609,7 +625,4 @@ class Swarm:
         
         plt.close(fig)
         print(f"Simulation complete. Video saved as {filename}")
-
-swarm = Swarm(N=100, dt=0.6, J=0.9, K=0, steps=1000, chirality=True, freq_mode=FrecMode.BIMODAL, phase_coupling=True)
-swarm.simulate_video()
 
