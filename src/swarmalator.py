@@ -1,3 +1,6 @@
+import csv
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -126,12 +129,17 @@ class Swarmalator:
 
         return V_mean, omega_mean
 
-    def stability_analysis(self):
+    def synchrony_order_parameter(self):
+        """Calculate the Kuramoto order parameter R for the current phases."""
+        return float(np.abs(np.mean(np.exp(1j * self.theta))))
+
+    def stability_analysis(self, x_prev=None, y_prev=None, theta_prev=None, advance=True):
         """
         Analyze the stability of the swarmalator system via the order parameters. 
         Eigenvalues require complex analysis, which is beyond the scope of this project.
         Args:
-            None
+            x_prev, y_prev, theta_prev (np.ndarray | None): previous step state for velocity-based metrics.
+            advance (bool): when True, advance one Euler step before computing metrics.
         Returns:
             state (str): stability state of the swarmalator system
             S_parameter (float): correlation order parameter s = 1 - each spatial position corresponds to a specific phase
@@ -139,13 +147,21 @@ class Swarmalator:
             Omega_parameter (float): mean phase velocity omega > 0 - swarmalators are changing phases 
             R_parameter (): The Synchrony Order Parameter R = 1 - all swarmalators have the same internal phase
         """
-        x_prev, y_prev, theta_prev = self.x.copy(), self.y.copy(), self.theta.copy()
-    
-        # Perform a step
-        self.time_step()
+        # If no previous snapshot provided, use current state
+        if x_prev is None:
+            x_prev = self.x.copy()
+        if y_prev is None:
+            y_prev = self.y.copy()
+        if theta_prev is None:
+            theta_prev = self.theta.copy()
+
+        # Optionally advance one step before measuring
+        if advance:
+            self.time_step()
 
         S_parameter = self.correlation_order_parameter()
         V_parameter, omega_parameter = self.calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
+        R_parameter = self.synchrony_order_parameter()
 
         # Can't get the splintered phase wave to work
         if S_parameter > 0.9 and V_parameter < 0.01 and omega_parameter < 0.01:
@@ -159,8 +175,7 @@ class Swarmalator:
             
         elif S_parameter <= 0.1:
             # Distinguish between Async and Sync when correlation S is zero 
-            R = np.abs(np.mean(np.exp(1j * self.theta)))
-            if R > 0.9:
+            if R_parameter > 0.9:
                 state = "Static Sync" # Zero correlation, High global synchrony 
             else:
                 state = "Static Async" # Zero correlation, Zero global synchrony 
@@ -168,7 +183,7 @@ class Swarmalator:
         else:
             state = "Transitioning"
 
-        return state, S_parameter, V_parameter, omega_parameter
+        return state, S_parameter, V_parameter, omega_parameter, R_parameter
         
     def animate(self, steps):
         plt.ion()
@@ -183,3 +198,57 @@ class Swarmalator:
                 plt.pause(0.01)
         plt.ioff()
         plt.show()
+
+    def run_with_logging(self, steps, log_path, log_interval=1):
+        """
+        Run the simulation and append order parameters to a CSV log.
+
+        Args:
+            steps (int): Number of Euler steps to perform.
+            log_path (str | Path): Destination CSV file. Parent dirs are created when needed.
+            log_interval (int): Write every `log_interval` steps (1 = every step).
+        """
+        log_path = Path(log_path)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+
+        fieldnames = ["step", "S", "V", "omega", "R", "J", "K", "N"]
+        is_new_file = not log_path.exists()
+
+        # snapshot of previous state for velocity-based metrics
+        prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
+
+        with log_path.open("a", newline="") as fh:
+            writer = csv.DictWriter(fh, fieldnames=fieldnames)
+            if is_new_file:
+                writer.writeheader()
+
+            # log initial state (step 0) with zero velocities
+            state0, S0, V0, omega0, R0 = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+            writer.writerow({
+                "step": 0,
+                "S": S0,
+                "V": V0,
+                "omega": omega0,
+                "R": R0,
+                "J": self.J,
+                "K": self.K,
+                "N": self.N,
+            })
+
+            for step_idx in range(1, steps + 1):
+                self.time_step()
+
+                if step_idx % log_interval == 0:
+                    state, S, V, omega, R = self.stability_analysis(prev_x, prev_y, prev_theta, advance=False)
+                    writer.writerow({
+                        "step": step_idx,
+                        "S": S,
+                        "V": V,
+                        "omega": omega,
+                        "R": R,
+                        "J": self.J,
+                        "K": self.K,
+                        "N": self.N,
+                    })
+
+                prev_x, prev_y, prev_theta = self.x.copy(), self.y.copy(), self.theta.copy()
