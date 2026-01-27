@@ -158,7 +158,7 @@ class Swarm:
             d_pred2 = pred_dx**2 + pred_dy**2 + self.eps
             d_pred = np.sqrt(d_pred2)
 
-            repulsion_mag = self.pred_hunting_strength / d_pred2
+            repulsion_mag = self.hunting_strength / d_pred2
             
             xdot += (pred_dx / d_pred) * repulsion_mag
             ydot += (pred_dy / d_pred) * repulsion_mag
