@@ -112,8 +112,8 @@ x = np.random.uniform(-L/2, L/2, N)
 y = np.random.uniform(-L/2, L/2, N)
 theta = np.random.uniform(-np.pi, np.pi, N)
 
-J = 0.52
-K = -.16
+J = 0.66
+K = -.8
 dt = 0.1
 
 plt.ion()
