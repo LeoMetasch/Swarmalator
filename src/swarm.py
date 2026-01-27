@@ -495,7 +495,7 @@ class Swarm:
                 state = "Static Sync" if R > 0.9 else "Static Async"
 
         # --- Moving states ---
-        elif S_parameter > 0.1 and V_parameter >= 0.01 and omega_parameter >= 0.01:
+        elif S_parameter > 0.1 and V_parameter >= 0.001 and omega_parameter >= 0.01:
             state = "Active Phase Wave"
 
         elif S_parameter <= 0.1:
