@@ -481,7 +481,7 @@ class Swarm:
 
         best_k, best_sep, best_comp, best_aniso, _ = None, None, None, None, None
         # --- Static-ish states ---
-        if V_parameter < 0.01 and omega_parameter < 0.01:
+        if V_parameter < 0.001 and omega_parameter < 0.01:
             if S_parameter > 0.1:
                 best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
                     k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
