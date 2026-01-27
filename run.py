@@ -95,7 +95,7 @@ def main():
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--dt", type=float, default=0.1)
-    p.add_argument("--steps", type=int, default=10000)
+    p.add_argument("--steps", type=int, default=15000)
     p.add_argument("--burnin", type=int, default=2000)
     p.add_argument("--sample_every", type=int, default=10)
     p.add_argument("--sweep", action="store_true")
