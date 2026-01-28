@@ -207,6 +207,13 @@ main {
     margin-top: 0.25rem;
 }
 
+.slider-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+    font-style: italic;
+}
+
 /* Sliders */
 input[type="range"] {
     width: 100%;

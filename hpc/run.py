@@ -2,17 +2,16 @@ import argparse
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from src.swarm import Swarm
+from swarm import Swarm
 import csv
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from functools import partial
 
-SCRIPT_DIR = Path(__file__).parent
-
 
 def save_final_state(swarm, N, J, K, seed, state, log_path):
-    os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
+    os.makedirs("final_states", exist_ok=True)
+
     plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
     plt.colorbar(label='Phase (theta)')
     plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
@@ -71,7 +70,7 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     # R_mean = float(np.mean(R_vals))
     # S_mean = float(np.mean(S_vals))
 
-    swarm.run_with_logging(steps=steps, log_path=SCRIPT_DIR / f"logs/temp_N{N}_J{J}_K{K}_seed{seed}.csv", log_interval=sample_every)
+    swarm.run_with_logging(steps=steps, log_path=f"logs/temp_N{N}_J{J}_K{K}_seed{seed}.csv", log_interval=sample_every)
 
     state, S_parameter, V_parameter, omega_parameter, R_parameter, best_k, best_sep, best_comp, best_aniso = swarm.stability_analysis()
 
@@ -96,16 +95,16 @@ def main():
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--dt", type=float, default=0.1)
-    p.add_argument("--steps", type=int, default=15000)
+    p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
-    p.add_argument("--sample_every", type=int, default=10)
+    p.add_argument("--sample_every", type=int, default=100)
     p.add_argument("--sweep", action="store_true")
-    p.add_argument("--Jmin", type=float, default=0.5)
+    p.add_argument("--Jmin", type=float, default=0)
     p.add_argument("--Jmax", type=float, default=1.0)
-    p.add_argument("--Jsteps", type=int, default=51)
+    p.add_argument("--Jsteps", type=int, default=26)
     p.add_argument("--Kmin", type=float, default=-.8)
     p.add_argument("--Kmax", type=float, default=.2)
-    p.add_argument("--Ksteps", type=int, default=51)
+    p.add_argument("--Ksteps", type=int, default=26)
     p.add_argument("--workers", type=int, default=None, 
                    help="Number of parallel workers (default: number of CPU cores)")
 
