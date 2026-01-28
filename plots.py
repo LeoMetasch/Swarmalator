@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
+from typing import Optional
 
 # Plotting parameters
 plt.rc('text', usetex=True)
@@ -14,9 +15,16 @@ TITLESIZE = 16
 LABELSIZE = 20
 TICKSIZE = 18
 
-def plot_phase_heatmap(csv_path="test.csv", out_path="plots/heatmap_state.png"):
+def plot_phase_heatmap(
+    csv_path: str = "test.csv", 
+    out_path: Optional[str] = "plots/heatmap_state.png"
+) -> None:
     """
-    Generates a categorical heatmap of the system state over J and K.
+    Generate a categorical heatmap of the system state over control parameters J and K.
+
+    Args:
+        csv_path: Path to the input CSV file containing simulation results.
+        out_path: Path to save the output heatmap image. If None, plots to screen.
     """
     try:
         df = pd.read_csv(csv_path)
@@ -83,9 +91,16 @@ def plot_phase_heatmap(csv_path="test.csv", out_path="plots/heatmap_state.png"):
     
     # plt.show()
 
-def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
+def plot_S_heatmap(
+    csv_path: str = "test.csv", 
+    out_path: Optional[str] = "plots/heatmap_S.png"
+) -> None:
     """
-    Generates a heatmap of the S parameter over J and K.
+    Generate a heatmap of the order parameter S over J and K.
+
+    Args:
+        csv_path: Path to the input CSV file.
+        out_path: Path to save the output image. If None, plots to screen.
     """
     try:
         df = pd.read_csv(csv_path)
@@ -135,11 +150,14 @@ def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
     
     # plt.show()
 
-def plot_transient_time_summary(csv_path="./results_data/transient_times_summary.csv"):
+def plot_transient_time_summary(
+    csv_path: str = "./results_data/transient_times_summary.csv"
+) -> None:
     """
-    Docstring for plot_transient_time_summary
-    
-    :param csv_path: Description
+    Generate a heatmap of transient times over J and K using summary data.
+
+    Args:
+        csv_path: Path to the summary CSV file containing transient times.
     """
     try:
         df = pd.read_csv(csv_path)
@@ -147,13 +165,11 @@ def plot_transient_time_summary(csv_path="./results_data/transient_times_summary
         print(f"Error: {csv_path} not found.")
         return
 
-        # Filter for a single seed
+    # Aggregate across seeds (averaging transient time)
     if 'seed' in df.columns:
-        unique_seeds = df['seed'].unique()
-        print(f"Found seeds: {unique_seeds}. Using seed={unique_seeds[0]} for plotting S heatmap.")
-        df = df[df['seed'] == unique_seeds[0]]
-        
-    df.drop_duplicates(subset=['J', 'K'], keep='last', inplace=True)
+        # We group by J, K and take the mean of transient_time (and any other numeric cols)
+        df = df.groupby(['J', 'K'])['transient_time'].mean().reset_index()
+
     plt.figure(figsize=(10, 8))
     
     pivot_df = df.pivot(index="J", columns="K", values="transient_time")
@@ -182,9 +198,16 @@ def plot_transient_time_summary(csv_path="./results_data/transient_times_summary
     
     # plt.show()
 
-def plot_transient_times(csv_path="results_data/transient_times_static_async.csv", out_path="transient_times.png"):
+def plot_transient_times(
+    csv_path: str = "results_data/transient_times_static_async.csv", 
+    out_path: Optional[str] = "transient_times.png"
+) -> None:
     """
-    Plots the transient time vs N with statistical aggregation.
+    Plot transient time vs N with statistical aggregation (mean and CI).
+
+    Args:
+        csv_path: Path to the input CSV file containing transient times.
+        out_path: Path to save the output plot. If None, plots to screen.
     """
     try:
         df = pd.read_csv(csv_path)
@@ -215,46 +238,10 @@ def plot_transient_times(csv_path="results_data/transient_times_static_async.csv
         print(f"Transient Time Plot saved to {out_path}")
     
     # plt.show()
-    
-def plot_method_comparison(
-    threshold_csv="results_data/transient_times_static_async.csv", 
-    mser_csv="results_data/transient_times_mser.csv",
-    out_path="transient_comparison.png"
-):
-    """
-    Overlays plots from both methods to compare them.
-    """
-    plt.figure(figsize=(10, 6))
-    
-    # Load Threshold Data
-    try:
-        df_thresh = pd.read_csv(threshold_csv)
-        if 'converged' in df_thresh.columns:
-            df_thresh = df_thresh[df_thresh['converged'] == True]
-        sns.lineplot(data=df_thresh, x="N", y="transient_time", marker="o", label="Threshold Method", errorbar=('ci', 95))
-    except FileNotFoundError:
-        print(f"Could not find {threshold_csv}")
-        
-    # Load MSER Data
-    try:
-        df_mser = pd.read_csv(mser_csv)
-        sns.lineplot(data=df_mser, x="N", y="transient_time", marker="o", label="MSER Method", errorbar=('ci', 95), linestyle="--")
-    except FileNotFoundError:
-        print(f"Could not find {mser_csv}")
-        
-    plt.title("Comparison of Transient Time Estimation Methods")
-    plt.xlabel("N")
-    plt.ylabel("Transient Time")
-    plt.legend()
-    plt.grid(True, linestyle="--", alpha=0.7)
-    plt.tight_layout()
-    
-    if out_path:
-        plt.savefig(out_path, dpi=300)
-        print(f"Comparison plot saved to {out_path}")
+
 
 if __name__ == "__main__":
+    pass
     # plot_phase_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_state_n_100.png")
     # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
     # plot_transient_times(csv_path="results_data/transient_times_mser.csv", out_path="tansient_times_mser.png")
-    plot_method_comparison()
