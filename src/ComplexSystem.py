@@ -105,20 +105,20 @@ def time_step_fast(x, y, theta, J, K, dt): # vectorized initial function
 
     return x_new, y_new, theta_new
 
-N = 100
+N = 200
 L = 10.0
 
 x = np.random.uniform(-L/2, L/2, N)
 y = np.random.uniform(-L/2, L/2, N)
 theta = np.random.uniform(-np.pi, np.pi, N)
 
-J = .9
-K = .1
-dt = 0.01
+J = 0.66
+K = -.8
+dt = 0.1
 
 plt.ion()
 
-steps = 20000
+steps = 10000
 
 for t in range(steps):
     x, y, theta = time_step_fast(x, y, theta, J, K, dt)
@@ -126,8 +126,8 @@ for t in range(steps):
     if t % 50 == 0:
         plt.clf()  
         plt.scatter(x, y, c=theta, cmap="hsv")
-        plt.xlim(-5, 5) 
-        plt.ylim(-5, 5)
+        plt.xlim(-3, 3) 
+        plt.ylim(-3, 3)
         plt.title(f"t = {t}")
         plt.legend(["Particles colored by phase"])
         plt.pause(0.01)
