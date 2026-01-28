@@ -19,6 +19,7 @@ def plot_phase_heatmap(csv_path="test.csv", out_path="plots/heatmap_state.png"):
         unique_seeds = df['seed'].unique()
         print(f"Found seeds: {unique_seeds}. Using seed={unique_seeds[0]} for plotting phase heatmap.")
         df = df[df['seed'] == unique_seeds[0]]
+    df.drop_duplicates(subset=['J', 'K'], keep='last', inplace=True)
 
     # Round J and K to ensure they pivot correctly
     df['J'] = df['J'].round(3)
@@ -87,6 +88,8 @@ def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
         unique_seeds = df['seed'].unique()
         print(f"Found seeds: {unique_seeds}. Using seed={unique_seeds[0]} for plotting S heatmap.")
         df = df[df['seed'] == unique_seeds[0]]
+        
+    df.drop_duplicates(subset=['J', 'K'], keep='last', inplace=True)
 
     # Round J and K
     df['J'] = df['J'].round(3)
@@ -122,6 +125,46 @@ def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
     
     # plt.show()
 
+def plot_transient_time_summary(csv_path="transient_times_summary.csv"):
+    """
+    Docstring for plot_transient_time_summary
+    
+    :param csv_path: Description
+    """
+    try:
+        df = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        print(f"Error: {csv_path} not found.")
+        return
+
+    plt.figure(figsize=(10, 8))
+    
+    pivot_df = df.pivot(index="J", columns="K", values="transient_time")
+    pivot_df = pivot_df.sort_index(ascending=True)
+    pivot_df = pivot_df.sort_index(axis=1, ascending=True)
+
+    ax = sns.heatmap(
+        pivot_df, 
+        cmap="magma", 
+        cbar_kws={'label': 'Transient Time'},
+        xticklabels=5,
+        yticklabels=5
+    )
+    
+    ax.invert_yaxis()
+    plt.title("Transient Time over J vs K")
+    plt.xlabel("K")
+    plt.ylabel("J")
+    
+    plt.tight_layout()
+    
+    if csv_path:
+        out_path = csv_path.replace(".csv", "_heatmap.png")
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        print(f"Transient Time Heatmap saved to {out_path}")
+    
+    # plt.show()
+                                
 if __name__ == "__main__":
-    plot_phase_heatmap()
-    plot_S_heatmap()
+    plot_phase_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_state_n_100.png")
+    plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
