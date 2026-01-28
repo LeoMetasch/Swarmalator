@@ -12,7 +12,7 @@ import numpy as np
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from src.swarm import Swarm
+from swarm import Swarm
 
 
 def run_ksweep(
@@ -43,8 +43,12 @@ def run_ksweep(
     """
     np.random.seed(seed)
     
-    # Generate K values
-    K_values = np.arange(K_min, K_max + dK/2, dK)  # +dK/2 to include K_max
+    # Generate K values (handles both forward and backward sweeps)
+    if dK > 0:
+        K_values = np.arange(K_min, K_max + dK/2, dK)
+    else:
+        # Backward sweep: dK is negative, K_min > K_max
+        K_values = np.arange(K_min, K_max + dK/2, dK)
     n_K = len(K_values)
     total_steps = n_K * steps_per_K
     
@@ -133,7 +137,7 @@ def main():
     p.add_argument("--dK", type=float, default=0.01, help="K increment between values")
     p.add_argument("--steps_per_K", type=int, default=1000, help="Simulation steps at each K")
     p.add_argument("--dt", type=float, default=0.1, help="Integration timestep")
-    p.add_argument("--log_interval", type=int, default=10, help="Log every N steps")
+    p.add_argument("--log_interval", type=int, default=1, help="Log every N steps")
     p.add_argument("--seed", type=int, default=42, help="Random seed")
     p.add_argument("--output", type=str, default="results/ksweep.csv", help="Output CSV path")
     
