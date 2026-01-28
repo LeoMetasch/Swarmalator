@@ -431,6 +431,13 @@ class SimulationController {
             this.sim.dt = parseFloat(e.target.value);
         });
 
+        // Hunting strength slider
+        const huntingStrengthSlider = document.getElementById('huntingStrengthSlider');
+        huntingStrengthSlider.addEventListener('input', (e) => {
+            document.getElementById('huntingStrengthValue').textContent = parseFloat(e.target.value).toFixed(1);
+            this.sim.huntingStrength = parseFloat(e.target.value);
+        });
+
         // Toggles - update live without reset
         document.getElementById('chiralityToggle').addEventListener('change', (e) => {
             this.sim.chirality = e.target.checked;
