@@ -4,6 +4,16 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 
+# Plotting parameters
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+sns.set(style="whitegrid")
+
+# SIZE PARAMEERS
+TITLESIZE = 16
+LABELSIZE = 20
+TICKSIZE = 18
+
 def plot_phase_heatmap(csv_path="test.csv", out_path="plots/heatmap_state.png"):
     """
     Generates a categorical heatmap of the system state over J and K.
@@ -57,9 +67,9 @@ def plot_phase_heatmap(csv_path="test.csv", out_path="plots/heatmap_state.png"):
     # Correct the y-axis direction
     ax.invert_yaxis()
     
-    plt.title("Phase Diagram: State over J vs K")
-    plt.xlabel("K")
-    plt.ylabel("J")
+    plt.title("Phase Diagram: State over J vs K", fontsize=TITLESIZE)
+    plt.xlabel("K", fontsize=LABELSIZE)
+    plt.ylabel("J", fontsize=LABELSIZE)
     
     # Create the legend
     patches = [plt.Rectangle((0,0),1,1, color=colors[i]) for i in range(len(unique_states))]
@@ -108,14 +118,14 @@ def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
         pivot_df, 
         cmap="viridis", 
         cbar_kws={'label': 'Order Parameter S'},
-        xticklabels=5,
-        yticklabels=5
+        xticklabels=LABELSIZE,
+        yticklabels=LABELSIZE
     )
     
     ax.invert_yaxis()
-    plt.title("Phase Diagram: Order Parameter S over J vs K")
-    plt.xlabel("K")
-    plt.ylabel("J")
+    plt.title("Phase Diagram: Order Parameter S over J vs K", fontsize=TITLESIZE)
+    plt.xlabel("K", fontsize=LABELSIZE)
+    plt.ylabel("J", fontsize=LABELSIZE)
     
     plt.tight_layout()
     
@@ -125,7 +135,7 @@ def plot_S_heatmap(csv_path="test.csv", out_path="plots/heatmap_S.png"):
     
     # plt.show()
 
-def plot_transient_time_summary(csv_path="transient_times_summary.csv"):
+def plot_transient_time_summary(csv_path="./results_data/transient_times_summary.csv"):
     """
     Docstring for plot_transient_time_summary
     
@@ -137,6 +147,13 @@ def plot_transient_time_summary(csv_path="transient_times_summary.csv"):
         print(f"Error: {csv_path} not found.")
         return
 
+        # Filter for a single seed
+    if 'seed' in df.columns:
+        unique_seeds = df['seed'].unique()
+        print(f"Found seeds: {unique_seeds}. Using seed={unique_seeds[0]} for plotting S heatmap.")
+        df = df[df['seed'] == unique_seeds[0]]
+        
+    df.drop_duplicates(subset=['J', 'K'], keep='last', inplace=True)
     plt.figure(figsize=(10, 8))
     
     pivot_df = df.pivot(index="J", columns="K", values="transient_time")
@@ -145,16 +162,16 @@ def plot_transient_time_summary(csv_path="transient_times_summary.csv"):
 
     ax = sns.heatmap(
         pivot_df, 
-        cmap="magma", 
+        cmap="cividis", 
         cbar_kws={'label': 'Transient Time'},
-        xticklabels=5,
-        yticklabels=5
+        xticklabels=LABELSIZE,
+        yticklabels=LABELSIZE
     )
     
     ax.invert_yaxis()
-    plt.title("Transient Time over J vs K")
-    plt.xlabel("K")
-    plt.ylabel("J")
+    plt.title("Transient Time over J vs K", fontsize=TITLESIZE)
+    plt.xlabel("K", fontsize=LABELSIZE)
+    plt.ylabel("J", fontsize=LABELSIZE)
     
     plt.tight_layout()
     
