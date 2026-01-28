@@ -91,7 +91,7 @@ def _run_once_wrapper(params):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--N", type=int, required=True)
+    p.add_argument("--N", type=int)
     p.add_argument("--Nmin", type=int, default=50)
     p.add_argument("--Nmax", type=int, default=200)
     p.add_argument("--Nsteps", type=int, default=4)
@@ -99,9 +99,9 @@ def main():
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--dt", type=float, default=0.1)
-    p.add_argument("--steps", type=int, default=5000)
+    p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
-    p.add_argument("--sample_every", type=int, default=100)
+    p.add_argument("--sample_every", type=int, default=1)
     p.add_argument("--sweep", action="store_true")
     p.add_argument("--Jmin", type=float, default=0.5)
     p.add_argument("--Jmax", type=float, default=1.0)
@@ -123,9 +123,10 @@ def main():
         Ks = np.linspace(args.Kmin, args.Kmax, args.Ksteps)
         Ns = np.linspace(args.Nmin, args.Nmax, args.Nsteps, dtype=int)
 
+
         # Build list of all parameter combinations
         param_list = [
-            (args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every)
+            (N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every)
             for J in Js
             for K in Ks
             for N in Ns
