@@ -1,11 +1,10 @@
 #!/bin/bash
 #SBATCH --job-name=swarmalator_sweep
-#SBATCH --account=          # <-- Replace with your project account
 #SBATCH --partition=genoa               # Options: genoa (192 cores), rome (128 cores), thin
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=192            # Number of parallel workers
-#SBATCH --time=08:00:00                 # Max walltime (HH:MM:SS)
+#SBATCH --time=24:00:00                 # Max walltime (HH:MM:SS)
 #SBATCH --output=slurm_logs/sweep_%j.out
 #SBATCH --error=slurm_logs/sweep_%j.err
 
