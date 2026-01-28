@@ -268,7 +268,7 @@ if __name__ == "__main__":
     
     # combine_logs_to_transient_times(
     #     log_dir="./logs",
-    #     output_csv="./results_data/transient_times_static_async.csv",
+    #     output_csv="./results_data/transient_times_static_sync.csv",
     #     window_size=50,
     #     threshold=0.01,
     #     require_all=True
@@ -276,5 +276,5 @@ if __name__ == "__main__":
     
     combine_logs_mser(
         log_dir="./logs",
-        output_csv="./results_data/transient_times_mser.csv"
+        output_csv="./results_data/transient_times_static_sync_mser.csv"
     )

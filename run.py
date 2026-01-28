@@ -12,14 +12,14 @@ SCRIPT_DIR = Path(__file__).parent
 
 
 def save_final_state(swarm, N, J, K, seed, state, log_path):
-    os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
-    plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
-    plt.colorbar(label='Phase (theta)')
-    plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
-    plt.close()
+    # os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
+    # plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
+    # plt.colorbar(label='Phase (theta)')
+    # plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
+    # plt.xlabel('x')
+    # plt.ylabel('y')
+    # plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
+    # plt.close()
 
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -101,7 +101,7 @@ def main():
     p.add_argument("--dt", type=float, default=0.1)
     p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
-    p.add_argument("--sample_every", type=int, default=1)
+    p.add_argument("--sample_every", type=int, default=1000)
     p.add_argument("--sweep", action="store_true")
     p.add_argument("--Jmin", type=float, default=0.5)
     p.add_argument("--Jmax", type=float, default=1.0)
@@ -118,6 +118,7 @@ def main():
 
     seeds = [0, 1, 2]
     seeds = range(30)
+    seeds = [0]
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)

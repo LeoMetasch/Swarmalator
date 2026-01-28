@@ -6,7 +6,8 @@ import numpy as np
 from typing import Optional
 
 # Plotting parameters
-plt.rc('text', usetex=True)
+# Plotting parameters
+plt.rc('text', usetex=False)
 plt.rc('font', family='serif')
 sns.set(style="whitegrid")
 
@@ -241,7 +242,6 @@ def plot_transient_times(
 
 
 if __name__ == "__main__":
-    pass
-    # plot_phase_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_state_n_100.png")
+    plot_phase_heatmap(csv_path='test.csv', out_path="plots/LATEST_AI_heatmap_state_n_200.png")
     # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
-    # plot_transient_times(csv_path="results_data/transient_times_mser.csv", out_path="tansient_times_mser.png")
+    # plot_transient_times(csv_path="results_data/static_sync_transient_times_mser.csv", out_path="plots/static_sync_transient_times_mser.png")
