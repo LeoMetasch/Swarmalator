@@ -164,7 +164,80 @@ def plot_transient_time_summary(csv_path="transient_times_summary.csv"):
         print(f"Transient Time Heatmap saved to {out_path}")
     
     # plt.show()
-                                
+
+def plot_transient_times(csv_path="results_data/transient_times_static_async.csv", out_path="transient_times.png"):
+    """
+    Plots the transient time vs N with statistical aggregation.
+    """
+    try:
+        df = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        print(f"Error: {csv_path} not found.")
+        return
+        
+    # If using the threshold method csv, filter for converged only
+    if 'converged' in df.columns:
+        df = df[df['converged'] == True]
+
+    plt.figure(figsize=(10, 6))
+    
+    # Plot line with confidence intervals
+    # sns.lineplot automatically aggregates multiple y values for the same x value 
+    # and plots the mean and a confidence interval (default 95%)
+    sns.lineplot(data=df, x="N", y="transient_time", marker="o", errorbar=('ci', 95))
+    
+    plt.title("Transient Time vs N")
+    plt.xlabel("N")
+    plt.ylabel("Transient Time")
+    plt.grid(True, linestyle="--", alpha=0.7)
+    
+    plt.tight_layout()
+    
+    if out_path:
+        plt.savefig(out_path, dpi=300)
+        print(f"Transient Time Plot saved to {out_path}")
+    
+    # plt.show()
+    
+def plot_method_comparison(
+    threshold_csv="results_data/transient_times_static_async.csv", 
+    mser_csv="results_data/transient_times_mser.csv",
+    out_path="transient_comparison.png"
+):
+    """
+    Overlays plots from both methods to compare them.
+    """
+    plt.figure(figsize=(10, 6))
+    
+    # Load Threshold Data
+    try:
+        df_thresh = pd.read_csv(threshold_csv)
+        if 'converged' in df_thresh.columns:
+            df_thresh = df_thresh[df_thresh['converged'] == True]
+        sns.lineplot(data=df_thresh, x="N", y="transient_time", marker="o", label="Threshold Method", errorbar=('ci', 95))
+    except FileNotFoundError:
+        print(f"Could not find {threshold_csv}")
+        
+    # Load MSER Data
+    try:
+        df_mser = pd.read_csv(mser_csv)
+        sns.lineplot(data=df_mser, x="N", y="transient_time", marker="o", label="MSER Method", errorbar=('ci', 95), linestyle="--")
+    except FileNotFoundError:
+        print(f"Could not find {mser_csv}")
+        
+    plt.title("Comparison of Transient Time Estimation Methods")
+    plt.xlabel("N")
+    plt.ylabel("Transient Time")
+    plt.legend()
+    plt.grid(True, linestyle="--", alpha=0.7)
+    plt.tight_layout()
+    
+    if out_path:
+        plt.savefig(out_path, dpi=300)
+        print(f"Comparison plot saved to {out_path}")
+
 if __name__ == "__main__":
-    plot_phase_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_state_n_100.png")
-    plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
+    # plot_phase_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_state_n_100.png")
+    # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
+    # plot_transient_times(csv_path="results_data/transient_times_mser.csv", out_path="tansient_times_mser.png")
+    plot_method_comparison()

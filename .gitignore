@@ -4,6 +4,16 @@ src/__pycache__/
 *.py[codz]
 *$py.class
 
+
+##############################
+# can remove before turning in
+##############################
+
+logs/
+final_states/
+plots/
+results_data/
+
 # C extensions
 *.so
 

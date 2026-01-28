@@ -1,3 +1,0 @@
-N,J,K,seed,transient_time,converged,window_size,threshold
-200,1.0,0.0,0,144.0,True,50,0.01
-200,1.0,0.2,0,,False,50,0.01

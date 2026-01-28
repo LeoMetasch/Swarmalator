@@ -117,6 +117,7 @@ def main():
     n_workers = args.workers if args.workers else cpu_count()
 
     seeds = [0, 1, 2]
+    seeds = range(30)
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
