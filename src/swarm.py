@@ -487,7 +487,7 @@ class Swarm:
                     k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
                 )
                 if (best_sep > 3.0) and (best_comp > 0.85):
-                    state = f"Splintered Phase Wave (k={best_k})"
+                    state = "Splintered Phase Wave"
                 else:
                     state = "Static Phase Wave"
             else:
