@@ -92,15 +92,17 @@ def plot_phase_heatmap(
     
     # plt.show()
 
-def plot_S_heatmap(
+def plot_param_heatmap(
     csv_path: str = "test.csv", 
-    out_path: Optional[str] = "plots/heatmap_S.png"
+    param: str = "S",
+    out_path: Optional[str] = "plots/heatmap_param.png"
 ) -> None:
     """
-    Generate a heatmap of the order parameter S over J and K.
+    Generate a heatmap of a specific order parameter over J and K, averaged across seeds.
 
     Args:
         csv_path: Path to the input CSV file.
+        param: The column name of the parameter to plot (e.g., 'S', 'V', 'R', 'omega').
         out_path: Path to save the output image. If None, plots to screen.
     """
     try:
@@ -109,20 +111,26 @@ def plot_S_heatmap(
         print(f"Error: {csv_path} not found.")
         return
 
-    # Filter for a single seed
-    if 'seed' in df.columns:
-        unique_seeds = df['seed'].unique()
-        print(f"Found seeds: {unique_seeds}. Using seed={unique_seeds[0]} for plotting S heatmap.")
-        df = df[df['seed'] == unique_seeds[0]]
-        
-    df.drop_duplicates(subset=['J', 'K'], keep='last', inplace=True)
+    if param not in df.columns:
+        print(f"Error: Parameter '{param}' not found in CSV columns: {df.columns.tolist()}")
+        return
 
-    # Round J and K
-    df['J'] = df['J'].round(3)
-    df['K'] = df['K'].round(3)
+    # Check columns
+    required = ['J', 'K']
+    if not all(col in df.columns for col in required):
+        print(f"Error: CSV must contain columns {required}")
+        return
 
-    # Pivot: K (index), J (columns), values (S)
-    pivot_df = df.pivot(index="J", columns="K", values="S")
+    # Group by J and K and calculate mean of the parameter
+    # This averages across all seeds present for each (J, K) pair
+    df_agg = df.groupby(['J', 'K'])[param].mean().reset_index()
+
+    # Round J and K to ensure they pivot correctly
+    df_agg['J'] = df_agg['J'].round(3)
+    df_agg['K'] = df_agg['K'].round(3)
+
+    # Pivot: K (index), J (columns), values (param)
+    pivot_df = df_agg.pivot(index="J", columns="K", values=param)
     
     # Sort
     pivot_df = pivot_df.sort_index(ascending=True) 
@@ -133,13 +141,13 @@ def plot_S_heatmap(
     ax = sns.heatmap(
         pivot_df, 
         cmap="viridis", 
-        cbar_kws={'label': 'Order Parameter S'},
+        cbar_kws={'label': f'Mean {param}'},
         xticklabels=LABELSIZE,
         yticklabels=LABELSIZE
     )
     
     ax.invert_yaxis()
-    plt.title("Phase Diagram: Order Parameter S over J vs K", fontsize=TITLESIZE)
+    plt.title(f"Phase Diagram: Mean {param} over J vs K", fontsize=TITLESIZE)
     plt.xlabel("K", fontsize=LABELSIZE)
     plt.ylabel("J", fontsize=LABELSIZE)
     
@@ -147,7 +155,7 @@ def plot_S_heatmap(
     
     if out_path:
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
-        print(f"S Heatmap saved to {out_path}")
+        print(f"{param} Heatmap saved to {out_path}")
     
     # plt.show()
 
@@ -239,9 +247,85 @@ def plot_transient_times(
     
     # plt.show()
 
+def plot_order_parameters_vs_K(
+    csv_path: str,
+    j_values: list[float],
+    out_path: Optional[str] = None
+) -> None:
+    """
+    Plot R, S, V, and omega vs K for multiple J values with 95% confidence intervals.
+
+    Args:
+        csv_path: Path to the input CSV file.
+        j_values: List of J values to filter by and plot.
+        out_path: Path to save the output image. If None, plots to screen.
+    """
+    try:
+        df = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        print(f"Error: {csv_path} not found.")
+        return
+
+    metrics = ['R', 'S', 'V', 'omega']
+    titles = {
+        'R': 'Synchrony (R)', 
+        'S': 'Correlation (S)', 
+        'V': 'Mean Spatial Velocity (V)', 
+        'omega': 'Mean Phase Velocity (omega)'
+    }
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharex=True)
+    axes = axes.flatten()
+
+    for j_val in j_values:
+        # df_j = df[np.isclose(df['J'], j_val)] if using floats carefully
+        # Simple equality for now
+        df_j = df[df['J'] == j_val].copy()
+        
+        if df_j.empty:
+            print(f"No data found for J={j_val}")
+            continue
+
+        for i, metric in enumerate(metrics):
+            ax = axes[i]
+            if metric in df_j.columns:
+                sns.lineplot(
+                    data=df_j, 
+                    x='K', 
+                    y=metric, 
+                    ax=ax, 
+                    marker='o', 
+                    errorbar=('ci', 95),
+                    label=f"J={j_val}"
+                )
+                ax.set_title(titles[metric], fontsize=TITLESIZE)
+                ax.set_ylabel(metric, fontsize=LABELSIZE)
+                ax.tick_params(axis='both', which='major', labelsize=TICKSIZE)
+                ax.grid(True, linestyle='--', alpha=0.7)
+            else:
+                ax.text(0.5, 0.5, f"{metric} not in data", ha='center')
+
+    # Set common X label
+    for ax in axes[-2:]:
+        ax.set_xlabel("K", fontsize=LABELSIZE)
+
+    fig.suptitle(f"Order Parameters vs K for J={j_values}", fontsize=TITLESIZE + 2)
+    plt.tight_layout()
+
+    if out_path:
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        print(f"Order Parameter Plot saved to {out_path}")
+    
+    # plt.show()
 
 if __name__ == "__main__":
     # plot_transient_time_summary(csv_path="results_data/heatmap_transient_times_mser.csv", out_path="plots/heatmap_transient_times_mser.png")
-    plot_phase_heatmap(csv_path='N200_30_seed.csv', out_path="plots/N200_30_seed_heatmap.png")
-    # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
+    # plot_phase_heatmap(csv_path='N200_30_seed.csv', out_path="plots/N200_30_seed_heatmap.png")
     # plot_transient_times(csv_path="results_data/static_sync_transient_times_mser.csv", out_path="plots/static_sync_transient_times_mser.png")
+    
+    # Test averaged heatmap for S
+    plot_param_heatmap(csv_path='N200_30_seed.csv', param='V', out_path="plots/heatmap_V_avg.png")
+    plot_param_heatmap(csv_path='N200_30_seed.csv', param='S', out_path="plots/heatmap_S_avg.png")
+    plot_param_heatmap(csv_path='N200_30_seed.csv', param='R', out_path="plots/heatmap_R_avg.png")
+    plot_param_heatmap(csv_path='N200_30_seed.csv', param='omega', out_path="plots/heatmap_omega_avg.png")
+    # plot_order_parameters_vs_K(csv_path='N200_30_seed.csv', j_values=[ 0.2, 0.4, 0.6, 0.8, 1.0], out_path="plots/order_params_vs_K_J0_1_5.png")
