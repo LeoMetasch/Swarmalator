@@ -92,6 +92,108 @@ def plot_phase_heatmap(
     
     # plt.show()
 
+
+def plot_phase_heatmap_voting(
+    csv_path: str = "test.csv", 
+    out_path: Optional[str] = "plots/heatmap_state_voting.png"
+) -> None:
+    """
+    Generate a categorical heatmap of the system state over control parameters J and K.
+    
+    Uses majority voting across all seeds to determine the state for each (J, K) 
+    parameter combination. In case of a tie, the most common state overall is used.
+
+    Args:
+        csv_path: Path to the input CSV file containing simulation results.
+        out_path: Path to save the output heatmap image. If None, plots to screen.
+    """
+    from scipy import stats
+    
+    try:
+        df = pd.read_csv(csv_path)
+    except FileNotFoundError:
+        print(f"Error: {csv_path} not found.")
+        return
+
+    # Round J and K to ensure they group correctly
+    df['J'] = df['J'].round(3)
+    df['K'] = df['K'].round(3)
+    
+    # Get unique states and the most common state overall (for tie-breaking)
+    unique_states = sorted([x for x in df['state'].unique() if pd.notna(x)])
+    overall_mode = df['state'].mode().iloc[0] if len(df['state'].mode()) > 0 else unique_states[0]
+    
+    def get_majority_state(group):
+        """Return the most common state in the group using majority voting."""
+        state_counts = group['state'].value_counts()
+        max_count = state_counts.max()
+        # Get all states with the maximum count (handle ties)
+        top_states = state_counts[state_counts == max_count].index.tolist()
+        if len(top_states) == 1:
+            return top_states[0]
+        else:
+            # Tie-breaking: use overall most common state if it's in the tie, 
+            # otherwise use the first one alphabetically
+            if overall_mode in top_states:
+                return overall_mode
+            return sorted(top_states)[0]
+    
+    # Group by J and K, apply majority voting
+    voting_df = df.groupby(['J', 'K']).apply(get_majority_state, include_groups=False).reset_index()
+    voting_df.columns = ['J', 'K', 'state']
+    
+    # Print summary of voting
+    n_seeds = df.groupby(['J', 'K']).size().iloc[0] if len(df) > 0 else 0
+    print(f"Using majority voting across {n_seeds} seeds for each (J, K) combination.")
+
+    # Pivot the data: J on index, K on columns
+    pivot_df = voting_df.pivot(index="J", columns="K", values="state")
+    
+    # Sort index and columns to ensure correct axis ordering
+    pivot_df = pivot_df.sort_index(ascending=True)
+    pivot_df = pivot_df.sort_index(axis=1, ascending=True)
+
+    # Get unique states to define numerical mapping and colors
+    unique_states = sorted([x for x in voting_df['state'].unique() if pd.notna(x)])
+    state_to_num = {state: i for i, state in enumerate(unique_states)}
+    
+    # Map the pivot table to numbers
+    pivot_num = pivot_df.map(lambda x: state_to_num.get(x, np.nan))
+
+    # Define a discrete colormap
+    colors = sns.color_palette("husl", len(unique_states))
+    cmap = mcolors.ListedColormap(colors)
+    
+    plt.figure(figsize=(10, 8))
+    
+    ax = sns.heatmap(
+        pivot_num, 
+        cmap=cmap, 
+        cbar=False, 
+        xticklabels=5, 
+        yticklabels=5
+    )
+    
+    # Correct the y-axis direction
+    ax.invert_yaxis()
+    
+    plt.title("Phase Diagram: State over J vs K (Majority Voting)", fontsize=TITLESIZE)
+    plt.xlabel("K", fontsize=LABELSIZE)
+    plt.ylabel("J", fontsize=LABELSIZE)
+    
+    # Create the legend
+    patches = [plt.Rectangle((0,0),1,1, color=colors[i]) for i in range(len(unique_states))]
+    plt.legend(patches, unique_states, title="State", loc='upper left', bbox_to_anchor=(1, 1))
+    
+    plt.tight_layout()
+    
+    if out_path:
+        plt.savefig(out_path, dpi=300, bbox_inches='tight')
+        print(f"State Heatmap (Voting) saved to {out_path}")
+    
+    # plt.show()
+
+
 def plot_S_heatmap(
     csv_path: str = "test.csv", 
     out_path: Optional[str] = "plots/heatmap_S.png"
@@ -242,6 +344,7 @@ def plot_transient_times(
 
 
 if __name__ == "__main__":
-    plot_phase_heatmap(csv_path='test.csv', out_path="plots/LATEST_AI_heatmap_state_n_200.png")
+    # plot_phase_heatmap(csv_path='test.csv', out_path="plots/LATEST_AI_heatmap_state_n_200.png")
+    plot_phase_heatmap_voting(csv_path="N200_30_seed.csv", out_path="plots/heatmap_state_voting.png")
     # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
     # plot_transient_times(csv_path="results_data/static_sync_transient_times_mser.csv", out_path="plots/static_sync_transient_times_mser.png")

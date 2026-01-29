@@ -27,7 +27,16 @@ def calculate_transient_times(
             - 'converged': Boolean if system converged
     """
     df = pd.read_csv(csv_path)
+    # STRIP WHITESPACE from columns to avoid KeyErrors
+    df.columns = df.columns.str.strip()
+    
     params = ['S', 'V', 'omega', 'R']
+    
+    # Validation check
+    missing_cols = set(params) - set(df.columns)
+    if missing_cols:
+        raise KeyError(f"Missing columns in {csv_path}: {missing_cols}")
+
     
     individual_times = {}
     
@@ -83,7 +92,13 @@ def combine_logs_to_transient_times(
     log_path = Path(log_dir)
     summary_records = []
     
-    for csv_file in log_path.glob("*.csv"):
+    csv_files = list(log_path.glob("*.csv"))
+    total_files = len(csv_files)
+    print(f"Found {total_files} files to process in {log_dir}...")
+
+    for i, csv_file in enumerate(csv_files):
+        if i % 100 == 0:
+            print(f"Processing file {i}/{total_files}...")
         params = {}
         parts = csv_file.stem.split('_')
         for part in parts:
@@ -96,18 +111,25 @@ def combine_logs_to_transient_times(
             elif part.startswith('seed'):
                 params['seed'] = int(part[4:])
         
-        results = calculate_transient_times(
-            str(csv_file), 
-            window_size=window_size, 
-            threshold=threshold,
-            require_all=require_all
-        )
-        
-        record = {**params, **results}
-        summary_records.append(record)
+        try:
+            results = calculate_transient_times(
+                str(csv_file), 
+                window_size=window_size, 
+                threshold=threshold,
+                require_all=require_all
+            )
+            
+            record = {**params, **results}
+            summary_records.append(record)
+        except Exception as e:
+            print(f"Skipping file {csv_file.name} due to error: {e}")
+            continue
+
     
     summary_df = pd.DataFrame(summary_records)
+    Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
     summary_df.to_csv(output_csv, index=False)
+
     print(f"Saved transient time summary to {output_csv}")
 
 def calculate_transient_time_mser(series: pd.Series) -> int:
@@ -256,7 +278,9 @@ def combine_logs_mser(
         summary_records.append(record)
     
     summary_df = pd.DataFrame(summary_records)
+    Path(output_csv).parent.mkdir(parents=True, exist_ok=True)
     summary_df.to_csv(output_csv, index=False)
+
     print(f"Saved MSER transient time summary to {output_csv}")
 
 if __name__ == "__main__":
@@ -266,13 +290,13 @@ if __name__ == "__main__":
     # results = calculate_transient_times(csv_path, window_size=50, threshold=0.01)
     # print(f"Transient time: {results['transient_time']}")
     
-    # combine_logs_to_transient_times(
-    #     log_dir="./logs",
-    #     output_csv="./results_data/transient_times_static_sync.csv",
-    #     window_size=50,
-    #     threshold=0.01,
-    #     require_all=True
-    # )
+    combine_logs_to_transient_times(
+        log_dir="./logs",
+        output_csv="./results_data/transient_times_static_sync.csv",
+        window_size=50,
+        threshold=0.01,
+        require_all=True
+    )
     
     combine_logs_mser(
         log_dir="./logs",

@@ -148,6 +148,7 @@ main {
     border: 1px solid var(--border);
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+    justify-content: center;
 }
 
 .btn-preset:hover {

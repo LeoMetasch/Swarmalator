@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from src.swarm import Swarm
+from swarm import Swarm
 import csv
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
@@ -12,14 +12,14 @@ SCRIPT_DIR = Path(__file__).parent
 
 
 def save_final_state(swarm, N, J, K, seed, state, log_path):
-    os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
-    plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
-    plt.colorbar(label='Phase (theta)')
-    plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
-    plt.close()
+    # os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
+    # plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
+    # plt.colorbar(label='Phase (theta)')
+    # plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
+    # plt.xlabel('x')
+    # plt.ylabel('y')
+    # plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
+    # plt.close()
 
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,12 +75,10 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
 
     state, S_parameter, V_parameter, omega_parameter, R_parameter, best_k, best_sep, best_comp, best_aniso = swarm.stability_analysis()
 
-    save_final_state(swarm, N, J, K, seed, state, log_path="test.csv")
-    print(f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}")
-    # return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
+    # save_final_state(swarm, N, J, K, seed, state, log_path="test.csv")
+    # print(f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}")
 
-
-    return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}"
+    return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{V_parameter},{omega_parameter},{state}"
 
 
 def _run_once_wrapper(params):
@@ -96,9 +94,9 @@ def main():
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--dt", type=float, default=0.1)
-    p.add_argument("--steps", type=int, default=15000)
+    p.add_argument("--steps", type=int, default=10000)
     p.add_argument("--burnin", type=int, default=2000)
-    p.add_argument("--sample_every", type=int, default=10)
+    p.add_argument("--sample_every", type=int, default=1000)
     p.add_argument("--sweep", action="store_true")
     p.add_argument("--Jmin", type=float, default=0.5)
     p.add_argument("--Jmax", type=float, default=1.0)
@@ -113,7 +111,7 @@ def main():
 
     n_workers = args.workers if args.workers else cpu_count()
 
-    seeds = [0, 1, 2]
+    seeds = range(30)
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
@@ -128,7 +126,7 @@ def main():
         ]
 
         print(f"Running {len(param_list)} simulations with {n_workers} workers...", file=__import__('sys').stderr)
-        print("N,J,K,seed,R,S,state")
+        print("N,J,K,seed,R,S,V,omega,state")
 
         # Run in parallel and collect results (order is preserved by Pool.map)
         with Pool(processes=n_workers) as pool:
@@ -138,7 +136,7 @@ def main():
             print(result)
 
     else:
-        print("N,J,K,seed,R,S,state")
+        print("N,J,K,seed,R,S,V,omega,state")
         print(run_once(args.N, args.J, args.K, args.seed, args.dt, args.steps, args.burnin, args.sample_every))
 
 

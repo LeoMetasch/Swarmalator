@@ -465,7 +465,7 @@ class SimulationController {
 
         // Presets
         document.querySelectorAll('.btn-preset').forEach(btn => {
-            btn.addEventListener('click', (e) => this.applyPreset(e.target.dataset.preset));
+            btn.addEventListener('click', (e) => this.applyPreset(e.currentTarget.dataset.preset));
         });
     }
 
@@ -610,14 +610,19 @@ class SimulationController {
 
     applyPreset(preset) {
         const presets = {
-            'static': { J: 1.0, K: 0.5, chirality: false, phaseCoupling: false, freqMode: 'zero' },
-            'phase-wave': { J: 0.1, K: 1.0, chirality: false, phaseCoupling: false, freqMode: 'zero' },
-            'chimera': { J: 0.9, K: 0.0, chirality: true, phaseCoupling: true, freqMode: 'bimodal' },
-            'chaos': { J: -0.5, K: -0.5, chirality: true, phaseCoupling: false, freqMode: 'random' }
+            'static-async': { J: 0.5, K: -1.0, chirality: false, phaseCoupling: false, freqMode: 'zero' },
+            'active-phase-wave': { J: 1.0, K: -0.5, chirality: false, phaseCoupling: false, freqMode: 'zero' },
+            'splintered-phase-wave': { J: 1.0, K: -0.15, chirality: false, phaseCoupling: false, freqMode: 'zero' },
+            'static-phase-wave': { J: 1.0, K: 0.0, chirality: false, phaseCoupling: false, freqMode: 'zero' },
+            'static-sync': { J: 1.0, K: 0.5, chirality: false, phaseCoupling: false, freqMode: 'zero' }
         };
 
         const p = presets[preset];
-        if (!p) return;
+        console.log('Applying preset:', preset, p);
+        if (!p) {
+            console.error('Preset not found:', preset);
+            return;
+        }
 
         // Update UI
         document.getElementById('jSlider').value = p.J;
