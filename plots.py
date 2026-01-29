@@ -234,7 +234,7 @@ def plot_transient_times(
     # and plots the mean and a confidence interval (default 95%)
     sns.lineplot(data=df, x="N", y="transient_time", marker="o", errorbar=('ci', 95))
     
-    plt.title("Transient Time vs N")
+    plt.title("Transient Time vs N (J=0.2, K=-0.5)")
     plt.xlabel("N")
     plt.ylabel("Transient Time")
     plt.grid(True, linestyle="--", alpha=0.7)
@@ -321,11 +321,11 @@ def plot_order_parameters_vs_K(
 if __name__ == "__main__":
     # plot_transient_time_summary(csv_path="results_data/heatmap_transient_times_mser.csv", out_path="plots/heatmap_transient_times_mser.png")
     # plot_phase_heatmap(csv_path='N200_30_seed.csv', out_path="plots/N200_30_seed_heatmap.png")
-    # plot_transient_times(csv_path="results_data/static_sync_transient_times_mser.csv", out_path="plots/static_sync_transient_times_mser.png")
+    plot_transient_times(csv_path="results_data/static_async_transient_times_mser.csv", out_path="plots/static_async_transient_times_mser_300.png")
     
     # Test averaged heatmap for S
-    plot_param_heatmap(csv_path='N200_30_seed.csv', param='V', out_path="plots/heatmap_V_avg.png")
-    plot_param_heatmap(csv_path='N200_30_seed.csv', param='S', out_path="plots/heatmap_S_avg.png")
-    plot_param_heatmap(csv_path='N200_30_seed.csv', param='R', out_path="plots/heatmap_R_avg.png")
-    plot_param_heatmap(csv_path='N200_30_seed.csv', param='omega', out_path="plots/heatmap_omega_avg.png")
+    # plot_param_heatmap(csv_path='N200_30_seed.csv', param='V', out_path="plots/heatmap_V_avg.png")
+    # plot_param_heatmap(csv_path='N200_30_seed.csv', param='S', out_path="plots/heatmap_S_avg.png")
+    # plot_param_heatmap(csv_path='N200_30_seed.csv', param='R', out_path="plots/heatmap_R_avg.png")
+    # plot_param_heatmap(csv_path='N200_30_seed.csv', param='omega', out_path="plots/heatmap_omega_avg.png")
     # plot_order_parameters_vs_K(csv_path='N200_30_seed.csv', j_values=[ 0.2, 0.4, 0.6, 0.8, 1.0], out_path="plots/order_params_vs_K_J0_1_5.png")
