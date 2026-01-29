@@ -152,7 +152,8 @@ def plot_S_heatmap(
     # plt.show()
 
 def plot_transient_time_summary(
-    csv_path: str = "./results_data/transient_times_summary.csv"
+    csv_path: str = "./results_data/transient_times_summary.csv",
+    out_path: Optional[str] = "transient_times_summary.png"
 ) -> None:
     """
     Generate a heatmap of transient times over J and K using summary data.
@@ -192,10 +193,8 @@ def plot_transient_time_summary(
     
     plt.tight_layout()
     
-    if csv_path:
-        out_path = csv_path.replace(".csv", "_heatmap.png")
-        plt.savefig(out_path, dpi=300, bbox_inches='tight')
-        print(f"Transient Time Heatmap saved to {out_path}")
+    plt.savefig(out_path, dpi=300, bbox_inches='tight')
+    print(f"Transient Time Heatmap saved to {out_path}")
     
     # plt.show()
 
@@ -242,6 +241,7 @@ def plot_transient_times(
 
 
 if __name__ == "__main__":
-    plot_phase_heatmap(csv_path='test.csv', out_path="plots/LATEST_AI_heatmap_state_n_200.png")
+    # plot_transient_time_summary(csv_path="results_data/heatmap_transient_times_mser.csv", out_path="plots/heatmap_transient_times_mser.png")
+    plot_phase_heatmap(csv_path='N200_30_seed.csv', out_path="plots/N200_30_seed_heatmap.png")
     # plot_S_heatmap(csv_path='sweep_18775448.csv', out_path="plots/heatmap_S_n_100.png")
     # plot_transient_times(csv_path="results_data/static_sync_transient_times_mser.csv", out_path="plots/static_sync_transient_times_mser.png")

@@ -12,7 +12,7 @@ class FrecMode(Enum):
     UNIFORM = "uniform" # omega_i = 1 for all
     BIMODAL = "bimodal" # omega_i = +1 (first half), -1 (second half)
     RANDOM = "random" # omega_i ~ U(-1, 1)
-    
+
 class Swarm:
     N: int
     dt: float
@@ -28,7 +28,7 @@ class Swarm:
     J: float
     K: float
     steps: int
-    
+
     def __init__(
         self,
         N: int,
@@ -42,6 +42,21 @@ class Swarm:
         predator: bool = False,
         hunting_strength: float = 1.0,
     ) -> None:
+        """
+        Initialize the Swarm simulation.
+
+        Args:
+            N: Number of particles.
+            dt: Time step size.
+            J: Attraction strength.
+            K: Coupling strength.
+            steps: Total number of steps.
+            chirality: Whether particles have chiral motion.
+            freq_mode: Frequency distribution mode.
+            phase_coupling: Whether to enable phase coupling.
+            predator: Whether a predator is present.
+            hunting_strength: Strength of predator repulsion.
+        """
 
         self.N = N
         self.eps = 1e-12
@@ -54,13 +69,13 @@ class Swarm:
         self.phase_coupling = phase_coupling
         self.predator = predator
         self.hunting_strength = hunting_strength
-        
+
         # State Initialization
         self.phases = np.random.uniform(-np.pi, np.pi, N)
         self.nat_freq = self._init_omega(freq_mode)
         self.x_pos = np.random.uniform(-1, 1, N)
         self.y_pos = np.random.uniform(-1, 1, N)
-        
+
         # Velocities (v_i): Vector quantity with x and y components
         if self.chirality:
             self.vx, self.vy = self.update_velocities()
@@ -80,6 +95,15 @@ class Swarm:
             self.pred_y = np.random.uniform(-1, 1)
 
     def _init_omega(self, mode: FrecMode) -> npt.NDArray[np.float64]:
+        """
+        Initialize natural frequencies based on the specified mode.
+
+        Args:
+            mode: The frequency distribution mode.
+
+        Returns:
+            Natural frequencies array.
+        """
         match mode:
             case FrecMode.ZERO:    return np.zeros(self.N)
             case FrecMode.UNIFORM: return np.ones(self.N)
@@ -87,28 +111,41 @@ class Swarm:
             case FrecMode.RANDOM:  return np.random.uniform(-1, 1, self.N)
 
     def phase_calc(self) -> tuple[npt.NDArray[np.float64] | float, npt.NDArray[np.float64] | float]:
+        """
+        Calculate phase coupling parameters Q_x and Q_theta.
+
+        Returns:
+            Tuple containing Q_x and Q_theta matrices (or scalars).
+        """
 
         if self.freq_mode == FrecMode.ZERO:
             return np.zeros(self.N), np.zeros(self.N)
-        
+
         omega_norm = np.where(self.nat_freq == 0, 1.0, np.abs(self.nat_freq))
         omega_sign = self.nat_freq / omega_norm
-        
+
         s_i = omega_sign[:, None]
         s_j = omega_sign[None, :]
         diff_sign = np.abs(s_j - s_i)
-        
+
         Q_x_mat = (np.pi / 2) * diff_sign
         Q_theta_mat = (np.pi / 4) * diff_sign
-        
+
         return Q_x_mat, Q_theta_mat
 
     def update_velocities(self) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+        """
+        Update particle velocities based on phases.
+
+        Returns:
+            Tuple of x and y velocity arrays.
+        """
         x_vel = self.nat_freq * np.cos(self.phases + np.pi / 2)
         y_vel = self.nat_freq * np.sin(self.phases + np.pi / 2)
         return x_vel, y_vel
 
     def step(self) -> None:
+        """Perform one simulation step using the Euler method."""
         dX = self.x_pos[None, :] - self.x_pos[:, None]
         dY = self.y_pos[None, :] - self.y_pos[:, None]
 
@@ -139,16 +176,16 @@ class Swarm:
             dx_all = self.x_pos - self.pred_x
             dy_all = self.y_pos - self.pred_y
             dist_sq_all = dx_all**2 + dy_all**2
-            
+
             nearest_idx = np.argmin(dist_sq_all)
-            
+
             target_x = self.x_pos[nearest_idx]
             target_y = self.y_pos[nearest_idx]
-            
+
             hunt_dx = target_x - self.pred_x
             hunt_dy = target_y - self.pred_y
             hunt_dist = np.sqrt(hunt_dx**2 + hunt_dy**2) + self.eps
-            
+
             self.pred_x += (hunt_dx / hunt_dist) * self.dt
             self.pred_y += (hunt_dy / hunt_dist) * self.dt
 
@@ -159,25 +196,21 @@ class Swarm:
             d_pred = np.sqrt(d_pred2)
 
             repulsion_mag = self.hunting_strength / d_pred2
-            
+
             xdot += (pred_dx / d_pred) * repulsion_mag
             ydot += (pred_dy / d_pred) * repulsion_mag
 
         self.x_pos += xdot * self.dt
         self.y_pos += ydot * self.dt
 
-    def _correlation_order_parameter(self):
+    def _correlation_order_parameter(self) -> float:
         """
         Calculate the correlation order parameter S+-.
 
-        Args:
-            x (np.ndarray): x-coordinates of swarmalators
-            y (np.ndarray): y-coordinates of swarmalators
-            theta (np.ndarray): phases of swarmalators
-
         Returns:
-            S_plus (float): correlation order parameter S+ 
-            S_minus (float): correlation order parameter S-   
+            S_plus (float): correlation order parameter S+
+            S_minus (float): correlation order parameter S-
+            Returns max(S_plus, S_minus).
         """
         phi = np.arctan2(self.y_pos, self.x_pos)
         W_plus = np.exp(1j*(phi + self.phases))
@@ -186,28 +219,34 @@ class Swarm:
         S_minus = np.abs(W_minus.sum()/self.N)
         return max(S_plus, S_minus)
 
-    def _calculate_velocity_order_parameter(self, x_prev, y_prev, theta_prev):
+    def _calculate_velocity_order_parameter(
+        self,
+        x_prev: npt.NDArray[np.float64],
+        y_prev: npt.NDArray[np.float64],
+        theta_prev: npt.NDArray[np.float64]
+    ) -> Tuple[float, float]:
         """
-        Calculate the mean spatial velocity (V) and mean phase velocity (Omega) order parameters by 
+        Calculate the mean spatial velocity (V) and mean phase velocity (Omega) order parameters by
         calculating the difference between the current and previous state.
 
         Args:
-            x_prev (np.ndarray): x-coordinates of swarmalators at previous time step
-            y_prev (np.ndarray): y-coordinates of swarmalators at previous time step
-            theta_prev (np.ndarray): phases of swarmalators at previous time step
+            x_prev: x-coordinates of swarmalators at previous time step
+            y_prev: y-coordinates of swarmalators at previous time step
+            theta_prev: phases of swarmalators at previous time step
         Returns:
             V_mean (float): mean spatial velocity
             omega_mean (float): mean phase velocity
         """
         ############ Spatial velocity (V) ####################################
+        # Ensure input arrays are float/compatible
         dx = self.x_pos - x_prev
         dy = self.y_pos - y_prev
         # Euclidean distance
         V = np.sqrt(dx**2 + dy**2)
-        V_mean = np.mean(V)
+        V_mean = float(np.mean(V))
 
         ############ Phase velocity (Omega) ##################################
-        # Use the shortest path to calculate the phase difference - on a circle, 
+        # Use the shortest path to calculate the phase difference - on a circle,
         # the shortest path between two angles is not always the absolute difference
         dtheta = self.phases - theta_prev
         dtheta = (dtheta + np.pi) % (2 * np.pi) - np.pi
@@ -215,16 +254,16 @@ class Swarm:
         # Calculate the mean phase velocity - how fast the phases (colours) are changing in the simulation
         # without accounting for the direction of change
         omega_i = np.abs(dtheta) / self.dt
-        
+
         # Are the oscillators still oscillating?
         omega_mean = np.mean(omega_i)
 
         return V_mean, omega_mean
-    
-    def _synchrony_order_parameter(self):
+
+    def _synchrony_order_parameter(self) -> float:
         """Calculate the Kuramoto order parameter R for the current phases."""
         return float(np.abs(np.mean(np.exp(1j * self.phases))))
-    
+
     def _circular_kmeans_labels(
         self,
         theta: NDArray[np.floating],
@@ -480,17 +519,17 @@ class Swarm:
         R_parameter = self._synchrony_order_parameter()
 
         best_k, best_sep, best_comp, best_aniso, _ = None, None, None, None, None
-        
+
         # 1. Check for Active Phase Wave (Specific dynamic state)
         if S_parameter > 0.5 and V_parameter >= 0.001 and omega_parameter >= 0.01:
             state = "Active Phase Wave"
-            
+
         # 2. Check for Static Async (Disordered)
         elif S_parameter <= 0.5:
-            # Paper calls low S "Static Async". 
+            # Paper calls low S "Static Async".
             # Note: We check R as well to distinguish Sync if S is low but R is high (unlikely but robust)
             state = "Static Sync" if R_parameter > 0.9 else "Static Async"
-            
+
         # 3. Everything else (High S, not Active) -> Treated as "Static-like" or "Quasi-Static"
         else:
             # This captures the original "Static" block AND the "Transitioning" gap.
@@ -508,15 +547,15 @@ class Swarm:
                 state = "Static Sync" if R > 0.9 else "Static Phase Wave"
 
         return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
-   
-    def run_with_logging(self, steps, log_path, log_interval=1):
+
+    def run_with_logging(self, steps: int, log_path: str | Path, log_interval: int = 1) -> None:
         """
         Run the simulation and append order parameters to a CSV log.
 
         Args:
-            steps (int): Number of Euler steps to perform.
-            log_path (str | Path): Destination CSV file. Parent dirs are created when needed.
-            log_interval (int): Write every `log_interval` steps (1 = every step).
+            steps: Number of Euler steps to perform.
+            log_path: Destination CSV file. Parent dirs are created when needed.
+            log_interval: Write every `log_interval` steps (1 = every step).
         """
         log_path = Path(log_path)
         log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -564,8 +603,14 @@ class Swarm:
                     })
 
                 prev_x, prev_y, prev_theta = self.x_pos.copy(), self.y_pos.copy(), self.phases.copy()
-                     
-    def animate(self, steps):
+
+    def animate(self, steps: int) -> None:
+        """
+        Run the simulation and visualize it with an animated plot.
+
+        Args:
+            steps: Number of steps to simulate/animate.
+        """
         plt.ion()
         for t in range(steps):
             self.step()
@@ -590,7 +635,7 @@ class Swarm:
     ) -> None:
         """
         Run simulation and save as an MP4 video.
-        
+
         Args:
             filename: Output filename (e.g., "swarm.mp4")
             interval: Record a frame every `interval` steps.
@@ -612,10 +657,10 @@ class Swarm:
         fig, ax = plt.subplots()
         # Initialize scatter plot for swarmalators
         scat = ax.scatter(self.x_pos, self.y_pos, c=self.phases, cmap="hsv", vmin=-np.pi, vmax=np.pi)
-        
+
         # Initialize predator marker (hidden initially)
         pred_marker, = ax.plot([], [], 'rx', markersize=15, markeredgewidth=3, label='Predator')
-        
+
         ax.set_xlim(-5, 5)
         ax.set_ylim(-5, 5)
         ax.set_aspect('equal')
@@ -627,7 +672,7 @@ class Swarm:
             print(f"  Predator will spawn at step {predator_start_step}")
             if predator_end_step is not None:
                 print(f"  Predator will be removed at step {predator_end_step}")
-        
+
         with writer.saving(fig, filename, dpi=dpi):
             for t in range(self.steps):
                 # Dynamic predator control
@@ -640,27 +685,27 @@ class Swarm:
                     elif predator_end_step is not None and t == predator_end_step:
                         self.predator = False
                         print(f"  [Step {t}] Predator removed")
-                
+
                 self.step()
 
                 if t % interval == 0:
                     # Update swarmalator positions
                     scat.set_offsets(np.column_stack((self.x_pos, self.y_pos)))
                     scat.set_array(self.phases)
-                    
+
                     # Update predator position if enabled
                     if self.predator:
                         pred_marker.set_data([self.pred_x], [self.pred_y])
                     else:
                         pred_marker.set_data([], [])
-                    
+
                     ax.set_title(f"t = {t}")
-                    
+
                     # Grab frame
                     writer.grab_frame()
-                    
+
                     if t % 1000 == 0:
                         print(f"Progress: {t}/{self.steps} steps...")
-        
+
         plt.close(fig)
         print(f"Simulation complete. Video saved as {filename}")
