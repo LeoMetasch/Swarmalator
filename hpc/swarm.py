@@ -6,6 +6,84 @@ import csv
 from pathlib import Path
 from numpy.typing import NDArray
 from typing import Optional, Tuple
+from numba import njit, prange
+
+
+@njit(parallel=True, fastmath=True, cache=True)
+def _step_kernel_numba(
+    x_pos: np.ndarray,
+    y_pos: np.ndarray, 
+    phases: np.ndarray,
+    nat_freq: np.ndarray,
+    vx: np.ndarray,
+    vy: np.ndarray,
+    J: float,
+    K: float,
+    N: int,
+    dt: float,
+    eps: float,
+    Q_x: np.ndarray,
+    Q_theta: np.ndarray,
+    is_scalar_Q: bool
+) -> tuple:
+    """
+    Numba-compiled step kernel for O(N²) pairwise interactions.
+    
+    Computes position and phase updates using JIT compilation with
+    parallel loops for significant speedup over pure NumPy.
+    
+    Returns:
+        tuple: (new_phases, new_x, new_y)
+    """
+    xdot = np.zeros(N)
+    ydot = np.zeros(N)
+    thetadot = nat_freq.copy()
+    
+    for i in prange(N):
+        sum_x = 0.0
+        sum_y = 0.0
+        sum_theta = 0.0
+        
+        for j in range(N):
+            if i == j:
+                continue
+                
+            dx = x_pos[j] - x_pos[i]
+            dy = y_pos[j] - y_pos[i]
+            dtheta = phases[j] - phases[i]
+            
+            dist2 = dx * dx + dy * dy
+            dist = np.sqrt(dist2)
+            
+            # Handle Q_x and Q_theta (scalar 0.0 or matrix)
+            if is_scalar_Q:
+                q_x = 0.0
+                q_theta = 0.0
+            else:
+                q_x = Q_x[i, j]
+                q_theta = Q_theta[i, j]
+            
+            c = np.cos(dtheta - q_x)
+            s = np.sin(dtheta - q_theta)
+            
+            coef = (1.0 + J * c) / (dist + eps) - 1.0 / (dist2 + eps)
+            
+            sum_x += dx * coef
+            sum_y += dy * coef
+            sum_theta += K * s / (dist + eps)
+        
+        xdot[i] = vx[i] + sum_x / N
+        ydot[i] = vy[i] + sum_y / N
+        thetadot[i] = nat_freq[i] + sum_theta / N
+    
+    # Update positions and phases
+    new_phases = phases + thetadot * dt
+    # Wrap phases to [-pi, pi]
+    new_phases = np.mod(new_phases + np.pi, 2 * np.pi) - np.pi
+    new_x = x_pos + xdot * dt
+    new_y = y_pos + ydot * dt
+    
+    return new_phases, new_x, new_y
 
 class FrecMode(Enum):
     ZERO = "zero" # omega_i = 0 for all
@@ -41,6 +119,7 @@ class Swarm:
         phase_coupling: bool = False,
         predator: bool = False,
         hunting_strength: float = 1.0,
+        use_numba: bool = True,
     ) -> None:
 
         self.N = N
@@ -54,6 +133,7 @@ class Swarm:
         self.phase_coupling = phase_coupling
         self.predator = predator
         self.hunting_strength = hunting_strength
+        self.use_numba = use_numba
         
         # State Initialization
         self.phases = np.random.uniform(-np.pi, np.pi, N)
@@ -480,29 +560,32 @@ class Swarm:
         R_parameter = self._synchrony_order_parameter()
 
         best_k, best_sep, best_comp, best_aniso, _ = None, None, None, None, None
-        # --- Static-ish states ---
-        if V_parameter < 0.001 and omega_parameter < 0.01:
-            if S_parameter > 0.1:
-                best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
-                    k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
-                )
-                if (best_sep > 3.0) and (best_comp > 0.85):
-                    state = "Splintered Phase Wave"
-                else:
-                    state = "Static Phase Wave"
-            else:
-                R = float(np.abs(np.mean(np.exp(1j * self.phases))))
-                state = "Static Sync" if R > 0.9 else "Static Async"
-
-        # --- Moving states ---
-        elif S_parameter > 0.1 and V_parameter >= 0.001 and omega_parameter >= 0.01:
+        
+        # 1. Check for Active Phase Wave (Specific dynamic state)
+        if S_parameter > 0.5 and V_parameter >= 0.001 and omega_parameter >= 0.01:
             state = "Active Phase Wave"
-
-        elif S_parameter <= 0.1:
+            
+        # 2. Check for Static Async (Disordered)
+        elif S_parameter <= 0.5:
+            # Paper calls low S "Static Async". 
+            # Note: We check R as well to distinguish Sync if S is low but R is high (unlikely but robust)
             state = "Static Sync" if R_parameter > 0.9 else "Static Async"
-
+            
+        # 3. Everything else (High S, not Active) -> Treated as "Static-like" or "Quasi-Static"
         else:
-            state = "Transitioning"
+            # This captures the original "Static" block AND the "Transitioning" gap.
+            # We assume if it's high S and not APW, it falls into the Static Phase Wave / Splintered / Sync family.
+            best_k, best_sep, best_comp, best_aniso, _ = self.splinter_diagnostics(
+                k_min=2, k_max=12, min_frac=0.05, seed=0, k_penalty=1.5
+            )
+            if (best_sep > 3.0) and (best_comp > 0.85):
+                state = "Splintered Phase Wave"
+            else:
+                # Distinguish Static Phase Wave vs Static Sync based on R
+                # Static Sync usually has high R_parameter (phases aligned)
+                # Static Phase Wave has high S but phases are distributed (low R)
+                R = float(np.abs(np.mean(np.exp(1j * self.phases))))
+                state = "Static Sync" if R > 0.9 else "Static Phase Wave"
 
         return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
    

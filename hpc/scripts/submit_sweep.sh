@@ -24,10 +24,10 @@ echo "Job ID: $SLURM_JOB_ID"
 echo "Start time: $(date)"
 
 python hpc/run.py \
-    --N 100 \
+    --N 200 \
     --sweep \
-    --Jmin 0 --Jmax 1 --Jsteps 100 \
-    --Kmin -1.0 --Kmax 0.2 --Ksteps 100 \
+    --Jmin 0 --Jmax 1 --Jsteps 101 \
+    --Kmin -1.0 --Kmax 0.2 --Ksteps 101 \
     --steps 10000 \
     --workers $SLURM_CPUS_PER_TASK \
     > results/sweep_$SLURM_JOB_ID.csv

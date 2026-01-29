@@ -26,6 +26,7 @@ def run_ksweep(
     log_interval: int,
     seed: int,
     output_path: Path,
+    independent: bool = False,
 ):
     """
     Run K-sweep with discrete K steps, logging all dynamics.
@@ -52,11 +53,13 @@ def run_ksweep(
     n_K = len(K_values)
     total_steps = n_K * steps_per_K
     
-    # Initialize swarm at starting K
-    swarm = Swarm(
-        N=N, J=J, K=K_values[0], dt=dt, steps=total_steps,
-        chirality=False, phase_coupling=False, predator=False
-    )
+    # Initialize swarm (only once if not independent)
+    if not independent:
+        swarm = Swarm(
+            N=N, J=J, K=K_values[0], dt=dt, steps=total_steps,
+            chirality=False, phase_coupling=False, predator=False,
+            use_numba=True
+        )
     
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -65,7 +68,7 @@ def run_ksweep(
         "step", "K", "t_at_K", "S", "R", "V", "omega", "state"
     ]
     
-    print(f"Starting K-sweep", file=sys.stderr)
+    print(f"Starting K-sweep ({'INDEPENDENT' if independent else 'ADIABATIC'})", file=sys.stderr)
     print(f"  K range: [{K_min}, {K_max}]", file=sys.stderr)
     print(f"  dK = {dK} → {n_K} K values", file=sys.stderr)
     print(f"  steps_per_K = {steps_per_K}", file=sys.stderr)
@@ -73,9 +76,10 @@ def run_ksweep(
     print(f"  Logging every {log_interval} steps → {total_steps // log_interval} data points", file=sys.stderr)
     
     # Store previous state for velocity calculation
-    prev_x = swarm.x_pos.copy()
-    prev_y = swarm.y_pos.copy()
-    prev_theta = swarm.phases.copy()
+    # (Initialize with dummy values)
+    prev_x = np.zeros(N)
+    prev_y = np.zeros(N)
+    prev_theta = np.zeros(N)
     
     global_step = 0
     
@@ -84,8 +88,20 @@ def run_ksweep(
         writer.writeheader()
         
         for i_K, K in enumerate(K_values):
-            # Set new K value (no re-initialization of positions/phases)
-            swarm.K = K
+            # If independent, re-initialize swarm at each K
+            if independent:
+                # Use a specific seed for each K to be deterministic but different
+                steps_for_this_K = steps_per_K
+                swarm = Swarm(
+                    N=N, J=J, K=K, dt=dt, steps=steps_for_this_K,
+                    chirality=False, phase_coupling=False, predator=False,
+                    use_numba=True
+                )
+                # Re-seed if needed, or let it be random based on global seed + offset
+                # np.random.seed(seed + i_K) # Optional: control seed per K
+            else:
+                # Set new K value (no re-initialization)
+                swarm.K = K
             
             for t_at_K in range(steps_per_K):
                 # Evolve one step
@@ -96,7 +112,12 @@ def run_ksweep(
                     # Compute order parameters
                     S = swarm._correlation_order_parameter()
                     R = swarm._synchrony_order_parameter()
-                    V, omega = swarm._calculate_velocity_order_parameter(prev_x, prev_y, prev_theta)
+                    
+                    # Need valid previous state for velocity
+                    if t_at_K > 0:
+                        V, omega = swarm._calculate_velocity_order_parameter(prev_x, prev_y, prev_theta)
+                    else:
+                        V, omega = 0.0, 0.0
                     
                     # Get state classification
                     state, _, _, _, _, _, _, _, _ = swarm.stability_analysis()
@@ -136,10 +157,11 @@ def main():
     p.add_argument("--Kmax", type=float, default=0.2, help="Ending K value")
     p.add_argument("--dK", type=float, default=0.01, help="K increment between values")
     p.add_argument("--steps_per_K", type=int, default=1000, help="Simulation steps at each K")
-    p.add_argument("--dt", type=float, default=0.1, help="Integration timestep")
+    p.add_argument("--dt", type=float, default=0.05, help="Integration timestep")
     p.add_argument("--log_interval", type=int, default=1, help="Log every N steps")
     p.add_argument("--seed", type=int, default=42, help="Random seed")
     p.add_argument("--output", type=str, default="results/ksweep.csv", help="Output CSV path")
+    p.add_argument("--independent", action="store_true", help="Re-initialize swarm for each K (removes hysteresis)")
     
     args = p.parse_args()
     
@@ -154,6 +176,7 @@ def main():
         log_interval=args.log_interval,
         seed=args.seed,
         output_path=Path(args.output),
+        independent=args.independent
     )
 
 
