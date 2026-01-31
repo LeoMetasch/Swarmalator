@@ -1,3 +1,5 @@
+"""Swarmalator simulation core and analysis utilities."""
+
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt
@@ -26,14 +28,26 @@ def _step_kernel_numba(
     Q_theta: np.ndarray,
     is_scalar_Q: bool
 ) -> tuple:
-    """
-    Numba-compiled step kernel for O(N²) pairwise interactions.
-    
-    Computes position and phase updates using JIT compilation with
-    parallel loops for significant speedup over pure NumPy.
-    
+    """Compute one step with Numba for $O(N^2)$ pairwise interactions.
+
+    Args:
+        x_pos: Current x-coordinates.
+        y_pos: Current y-coordinates.
+        phases: Current phase angles.
+        nat_freq: Natural frequencies.
+        vx: Current x-velocities.
+        vy: Current y-velocities.
+        J: Spatial coupling strength.
+        K: Phase coupling strength.
+        N: Number of swarmalators.
+        dt: Time step.
+        eps: Small constant to avoid division by zero.
+        Q_x: Phase coupling offsets for position updates.
+        Q_theta: Phase coupling offsets for phase updates.
+        is_scalar_Q: Whether Q parameters are disabled.
+
     Returns:
-        tuple: (new_phases, new_x, new_y)
+        Tuple of updated arrays: (new_phases, new_x, new_y).
     """
     xdot = np.zeros(N)
     ydot = np.zeros(N)
@@ -86,12 +100,14 @@ def _step_kernel_numba(
     return new_phases, new_x, new_y
 
 class FrecMode(Enum):
+    """Natural frequency initialization modes."""
     ZERO = "zero" # omega_i = 0 for all
     UNIFORM = "uniform" # omega_i = 1 for all
     BIMODAL = "bimodal" # omega_i = +1 (first half), -1 (second half)
     RANDOM = "random" # omega_i ~ U(-1, 1)
 
 class Swarm:
+    """Swarmalator simulation with optional Numba acceleration and diagnostics."""
     N: int
     dt: float
     eps: float

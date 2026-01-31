@@ -1,3 +1,8 @@
+"""
+Plotting functions for Swarmalator simulation results.
+Generates heatmaps and line plots for various order parameters and transient times.
+"""
+
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -210,8 +215,7 @@ def plot_transient_times(
     csv_path: str = "results_data/transient_times_static_async.csv", 
     out_path: Optional[str] = "transient_times.png"
 ) -> None:
-    """
-    Plot transient time vs N with statistical aggregation (mean and CI).
+    """Plot transient time versus $N$ with mean and confidence intervals (95%).
 
     Args:
         csv_path: Path to the input CSV file containing transient times.
@@ -252,8 +256,7 @@ def plot_order_parameters_vs_K(
     j_values: list[float],
     out_path: Optional[str] = None
 ) -> None:
-    """
-    Plot R, S, V, and omega vs K for multiple J values with 95% confidence intervals.
+    """Plot order parameters versus $K$ for multiple $J$ values.
 
     Args:
         csv_path: Path to the input CSV file.

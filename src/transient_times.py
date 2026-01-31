@@ -1,3 +1,5 @@
+"""Transient time analysis utilities for Swarmalator logs."""
+
 from swarm import Swarm
 
 import pandas as pd
@@ -221,6 +223,11 @@ def calculate_transient_time_mser(series: pd.Series) -> int:
 def apply_mser_to_csv(csv_path: str) -> dict:
     """
     Apply MSER to all standard order parameters in the CSV and return the max transient time.
+    Args:
+        csv_path: Path to the input CSV.
+
+    Returns:
+        Dictionary containing overall transient time and per-parameter times.
     """
     try:
         df = pd.read_csv(csv_path)
@@ -247,8 +254,11 @@ def combine_logs_mser(
     log_dir: str,
     output_csv: str
 ):
-    """
-    Process all logs using MSER and save summary.
+    """Process all log files with MSER and save a summary CSV.
+
+    Args:
+        log_dir: Directory with log CSV files.
+        output_csv: Path to save summary CSV.
     """
     log_path = Path(log_dir)
     summary_records = []

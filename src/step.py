@@ -1,21 +1,23 @@
+"""Minimal Swarmalator step function and demo animation."""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def step(x: np.ndarray, y: np.ndarray, theta: np.ndarray, dt: float, J: float, K: float, eps: float = 1e-12):
-    """_summary_
+    """Advance swarmalator positions and phases by one Euler step.
 
     Args:
-        x (np.ndarray): _description_
-        y (np.ndarray): _description_
-        theta (np.ndarray): _description_
-        dt (float): _description_
-        J (float): _description_
-        K (float): _description_
-        eps (float, optional): _description_. Defaults to 1e-12.
+        x: $x$-coordinates of agents.
+        y: $y$-coordinates of agents.
+        theta: Phase angles for each agent.
+        dt: Time step.
+        J: Spatial attraction strength.
+        K: Phase coupling strength.
+        eps: Small constant to avoid division by zero.
 
     Returns:
-        _type_: _description_
+        Tuple of updated arrays: $(x_{t+1}, y_{t+1}, \theta_{t+1})$.
     """
     N = x.size
 
