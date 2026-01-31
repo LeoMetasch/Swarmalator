@@ -105,7 +105,7 @@ def experiment_hunting_strength_impact(
                 y_prev = swarm.y_pos.copy()
                 theta_prev = swarm.phases.copy()
     
-    # Plot S (correlation order parameter) only
+    # Plot S 
     fig, ax = plt.subplots(figsize=(10, 6))
     
     for h_strength in hunting_strengths:
@@ -142,11 +142,6 @@ def experiment_hunting_strength_impact(
     
     print(f"Results saved to {save_path}")
     return results
-
-
-# =============================================================================
-# Experiment 2: Relaxation Speed After Predator Removal
-# =============================================================================
 
 def experiment_relaxation_speed(
     N: int = 500,
@@ -195,7 +190,6 @@ def experiment_relaxation_speed(
         y_prev = swarm.y_pos.copy()
         theta_prev = swarm.phases.copy()
         
-        # ========== Phase 1: Burnin ==========
         for step in range(burnin_steps):
             swarm.step()
             
@@ -211,7 +205,6 @@ def experiment_relaxation_speed(
         
         print(f"  After burnin (step {burnin_steps}): S={S_trace[-1]:.3f}, V={V_trace[-1]:.6f}")
         
-        # ========== Phase 2: Predator Active ==========
         swarm.predator = True
         swarm.hunting_strength = h_strength
         swarm.pred_x = np.random.uniform(-1, 1)
@@ -272,7 +265,6 @@ def experiment_relaxation_speed(
             "S": S_trace,
         }
     
-    # ========== Plot: V over ENTIRE run ==========
     fig, ax = plt.subplots(figsize=(14, 6))
     
     for h_strength in hunting_strengths:
@@ -294,8 +286,7 @@ def experiment_relaxation_speed(
     plt.tight_layout()
     plt.savefig(save_path / "full_velocity_trace.png", dpi=150)
     plt.close()
-    
-    # ========== Plot: Relaxation time bar chart ==========
+
     fig, ax = plt.subplots(figsize=(8, 5))
     h_vals = list(relaxation_times.keys())
     t_vals = list(relaxation_times.values())
@@ -320,10 +311,6 @@ def experiment_relaxation_speed(
     print(f"Results saved to {save_path}")
     return relaxation_times, full_traces
 
-
-# =============================================================================
-# Main: Run both experiments
-# =============================================================================
 
 if __name__ == "__main__":
     print("=" * 60)

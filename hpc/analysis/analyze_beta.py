@@ -1,3 +1,8 @@
+"""
+Critical exponent β analysis.
+
+Extracts β from the scaling relation S ~ |K - Kc|^β using log-log regression.
+"""
 import argparse
 import json
 import numpy as np
@@ -9,6 +14,7 @@ from glob import glob
 
 
 def analyze_beta(data_dir: Path, Kc_file: Path, output_dir: Path):
+    """Extract β exponent from K-sweep data via log-log fit."""
     output_dir.mkdir(parents=True, exist_ok=True)
     
     with open(Kc_file) as f:

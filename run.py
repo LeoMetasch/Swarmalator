@@ -76,11 +76,11 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     state, S_parameter, V_parameter, omega_parameter, R_parameter, best_k, best_sep, best_comp, best_aniso = swarm.stability_analysis()
 
     save_final_state(swarm, N, J, K, seed, state, log_path="test.csv")
-    print(f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}")
+    print(f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{V_parameter},{omega_parameter},{state}")
     # return state, float(S_parameter), float(V_parameter), float(omega_parameter), float(R_parameter), best_k, best_sep, best_comp, best_aniso
 
 
-    return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}"
+    return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{V_parameter},{omega_parameter},{state}"
 
 
 def _run_once_wrapper(params):
@@ -116,9 +116,7 @@ def main():
 
     n_workers = args.workers if args.workers else cpu_count()
 
-    seeds = [0, 1, 2]
     seeds = range(30)
-    seeds = [0]
 
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
@@ -136,9 +134,8 @@ def main():
         ]
 
         print(f"Running {len(param_list)} simulations with {n_workers} workers...", file=__import__('sys').stderr)
-        print("N,J,K,seed,R,S,state")
-
-        # Run in parallel and collect results (order is preserved by Pool.map)
+        print("N,J,K,seed,R,S,V,omega,state")
+        
         with Pool(processes=n_workers) as pool:
             results = pool.map(_run_once_wrapper, param_list)
 

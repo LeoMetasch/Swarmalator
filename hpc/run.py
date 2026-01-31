@@ -1,3 +1,9 @@
+"""
+Parallel parameter sweep runner for swarmalator simulations.
+
+Runs simulations across J/K parameter space with multiple seeds,
+outputting final state order parameters to CSV.
+"""
 import argparse
 import numpy as np
 import os
@@ -12,28 +18,17 @@ SCRIPT_DIR = Path(__file__).parent
 
 
 def save_final_state(swarm, N, J, K, seed, state, log_path):
-    # os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
-    # plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
-    # plt.colorbar(label='Phase (theta)')
-    # plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
-    # plt.xlabel('x')
-    # plt.ylabel('y')
-    # plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
-    # plt.close()
-
+    """Log final simulation state to CSV."""
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state", "seed"]
     is_new_file = not log_path.exists()
-
-    
 
     with log_path.open("a", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         if is_new_file:
             writer.writeheader()
 
-        # log initial state (step 0) with zero velocities
         state0, S0, V0, omega0, R0, best_k0, best_sep0, best_comp0, best_aniso0 = swarm.stability_analysis()
         writer.writerow({
             "J": swarm.J,
@@ -48,8 +43,12 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
         })
 
 
-
 def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
+    """
+    Run a single simulation and return order parameters.
+    
+    Returns CSV-formatted string: N,J,K,seed,R,S,V,omega,state
+    """
     np.random.seed(seed)
 
     # x = np.random.uniform(-1.0, 1.0, N)
@@ -78,6 +77,8 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     # save_final_state(swarm, N, J, K, seed, state, log_path="test.csv")
     # print(f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{state}")
 
+
+    
     return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{V_parameter},{omega_parameter},{state}"
 
 
@@ -90,6 +91,9 @@ def _run_once_wrapper(params):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--N", type=int, required=True)
+    # p.add_argument("--Nmin", type=int, default=50)
+    # p.add_argument("--Nmax", type=int, default=200)
+    # p.add_argument("--Nsteps", type=int, default=4)
     p.add_argument("--J", type=float, default=0.0)
     p.add_argument("--K", type=float, default=0.0)
     p.add_argument("--seed", type=int, default=0)
@@ -116,19 +120,20 @@ def main():
     if args.sweep:
         Js = np.linspace(args.Jmin, args.Jmax, args.Jsteps)
         Ks = np.linspace(args.Kmin, args.Kmax, args.Ksteps)
+        # Ns = np.linspace(args.Nmin, args.Nmax, args.Nsteps, dtype=int)
 
         # Build list of all parameter combinations
         param_list = [
             (args.N, float(J), float(K), seed, args.dt, args.steps, args.burnin, args.sample_every)
             for J in Js
             for K in Ks
+            # for N in Ns
             for seed in seeds
         ]
 
         print(f"Running {len(param_list)} simulations with {n_workers} workers...", file=__import__('sys').stderr)
         print("N,J,K,seed,R,S,V,omega,state")
 
-        # Run in parallel and collect results (order is preserved by Pool.map)
         with Pool(processes=n_workers) as pool:
             results = pool.map(_run_once_wrapper, param_list)
 
