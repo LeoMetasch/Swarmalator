@@ -1,8 +1,8 @@
 import pandas as pd
 from scipy.stats import spearmanr
 
-sync = pd.read_csv("static_sync_transient_times_mser.csv")
-async_ = pd.read_csv("static_async_transient_times_mser.csv")
+sync = pd.read_csv("StatisticalTests/static_sync_transient_times_mser.csv")
+async_ = pd.read_csv("StatisticalTests/static_async_transient_times_mser.csv")
 
 sync_mean = sync.groupby("N")["transient_time"].mean().reset_index()
 async_mean = async_.groupby("N")["transient_time"].mean().reset_index()
