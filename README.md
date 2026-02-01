@@ -1,9 +1,41 @@
 # Swarmalator
-Implementation of the swarmalator model based on the paper "Oscillators that sync and swarm" by O'Keeffe et al. (2017) https://www.nature.com/articles/s41467-017-01190-3
+
+## Introduction
+
+**Swarmalators** are agents that simultaneously **swarm** (move in space) and **sync** (oscillate in phase). This unique combination of spatial and phase dynamics leads to emergent collective behaviors including static sync, static async, active phase waves, and splintered phase waves. The model reveals rich phase transitions and critical phenomena at the intersection of swarming and synchronization. This project provides a Python simulation framework with Numba acceleration for large-scale experiments, an interactive web demo for real-time visualization and exploration, and an HPC analysis suite for extracting critical exponents and phase transition properties. Several additional model extensions are implemented, including:
+
+- Swarmalators with variable phase coupling strength
+- Swarmalators with variable internal phase change rates
+- Swarmalators with intirsic movement based on internal phase change 
+- Predator implementation with varbiable hunting strengh 
+
+
+
+## Project Summary
+**Computational study of coupled oscillators that sync and swarm**
+
+Implementation based on the model by O'Keeffe et al. (2017): [Oscillators that sync and swarm](https://www.nature.com/articles/s41467-017-01190-3)
+
+
+## Overview
+
+Swarmalators are particles that exhibit both collective swarming (spatial attraction) and synchronization (phase coupling). This project provides:
+
+- **Python simulation framework** with Numba acceleration for large-scale experiments
+- **Interactive web demo** for real-time visualization and exploration
+- **HPC analysis suite** for extracting critical exponents and phase transition properties
+- **Order parameter tracking**: Correlation (S), synchrony (R), spatial velocity (V), phase velocity (Ω)
+
+The system exhibits diverse collective states depending on coupling parameters J (spatial) and K (phase):
+- **Static Sync**: Synchronized phases, stationary cluster
+- **Static Async**: Unsynchronized phases, stationary cluster  
+- **Active/Static Phase Wave**: Correlated spatial-phase patterns
+- **Splintered Phase Wave**: Fragmented phase clusters
 
 ![alt text](image.png)
 
 ## Quick Start
+Instead of a requirements.txt file, this project uses `uv` to manage dependencies. See pyproject.toml for details.
 ```bash
 uv venv 
 uv sync
@@ -11,10 +43,23 @@ source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate on Windows
 ```
 
+Instead of a requirements.txt file, this project uses `uv` to manage dependencies. 
+
 ## Logging Order Parameters
 - Run `python main.py` to execute a sample experiment
 - Order-parameter snapshots are written to `logs/experiment_log.csv` with columns: step, S, V, omega, R, J, K, N
 - Adjust parameters in `main.py` (see `run_experiment`) for custom sweeps
+
+---
+
+## AI Usage
+
+This project was developed with assistance from AI tools:
+- **Code refactoring**: Claude assisted in simplifying analysis scripts to remove verbose AI-generated patterns
+- **Documentation**: AI helped generate docstrings, README structure, and usage examples
+- **Analysis implementation**: Statistical testing frameworks and critical exponent extraction methods were developed collaboratively
+
+All code has been manually reviewed and tested. The core physics implementation and experimental design are human-driven.
 
 ---
 
@@ -147,3 +192,15 @@ open demo/index.html
 python -m http.server 8000 --directory demo
 # Then visit http://localhost:8000
 ```
+
+---
+
+## AI Usage
+
+This project was developed with assistance from AI tools Claude/Gemini for:
+
+- **Code development**: Assistance with code runtime optimization and debugging
+- **Documentation**: README structure and code comments
+- **Interactive demo**: Help with the JavaScript implementation of the web-based visualization and UI design
+
+AI has not been used for any scientific analysis or data interpretation (except for code refactoring). All code has been manually strucured, reviewed and tested. The simulation implementation and experiments are self implemented.
