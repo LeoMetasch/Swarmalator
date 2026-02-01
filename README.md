@@ -165,7 +165,7 @@ python -m src.run \
 
 **Pre-computed Dataset:**
 
-The file `N200_30_seed.csv` (37 MB) contains results from a comprehensive J-K parameter sweep on Snellius HPC cluster:
+The file `src/results_data/N200_30_seed.csv` (37 MB) contains results from a comprehensive J-K parameter sweep on Snellius HPC cluster:
 
 - **N = 200** swarmalators
 - **J**: 0.0 to 1.0 (step 0.01)
@@ -223,9 +223,8 @@ The core Python implementation of the Swarmalator model.
 - **Intermediate Logs**: `run.py` writes snapshot logs (every `--sample_every` steps) to `src/logs/`.
   - Format: `temp_N{N}_J{J}_K{K}_seed{seed}.csv`
 - **Final States**: Summaries of the final simulation state (order parameters, cluster diagnostics) are appended to CSV files (e.g., `test.csv` or as configured in scripts).
-- **Plots**: Generated visualizations (heatmaps, phase diagrams, order parameter plots) are saved to `plots/`.
-- **Results Data**: Processed analysis results (transient times, aggregated statistics) are saved to `results_data/`.
-- **Analysis Results**: Analysis scripts may also write to specific subdirectories like `results/hunting_strength/`.
+- **Plots**: Generated visualizations (heatmaps, phase diagrams, order parameter plots) are saved to `plots/` (root level).
+- **Results Data**: Processed analysis results (transient times, aggregated statistics) are saved to `src/results_data/`.
 
 ---
 
