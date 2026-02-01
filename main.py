@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from src.swarm import Swarm
 
-def run_experiment():
+def run_experiment() -> None:
 	"""Run a sample simulation and log order parameters to CSV."""
 
 	# Core parameters for this run

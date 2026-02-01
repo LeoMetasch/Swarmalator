@@ -15,7 +15,17 @@ from scipy.signal import savgol_filter
 
 
 def load_sweep_data(data_dir: Path) -> pd.DataFrame:
-    """Load all CSV files from a directory and combine them."""
+    """Load all CSV files from a directory and combine them.
+    
+    Args:
+        data_dir: Directory containing K-sweep CSV files.
+    
+    Returns:
+        Combined DataFrame with all sweep data and seed/run columns.
+    
+    Raises:
+        ValueError: If no CSV files found in directory.
+    """
     all_dfs = []
     csv_files = sorted(data_dir.glob("*.csv"))
     
@@ -34,6 +44,14 @@ def load_sweep_data(data_dir: Path) -> pd.DataFrame:
 
 
 def compute_stats(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute per-K statistics including mean, std, and susceptibility.
+    
+    Args:
+        df: DataFrame with K and order parameter columns.
+    
+    Returns:
+        DataFrame with aggregated statistics per K value.
+    """
     stats = df.groupby('K').agg({
         'S': ['mean', 'std', 'median', lambda x: np.percentile(x, 25), lambda x: np.percentile(x, 75)],
         'R': ['mean', 'std'],
@@ -50,8 +68,14 @@ def compute_stats(df: pd.DataFrame) -> pd.DataFrame:
 
 
 
-def analyze_hysteresis(forward_dir: Path, backward_dir: Path, output_dir: Path):
-    """Main analysis function."""
+def analyze_hysteresis(forward_dir: Path, backward_dir: Path, output_dir: Path) -> None:
+    """Analyze hysteresis by comparing forward vs backward K-sweeps.
+    
+    Args:
+        forward_dir: Directory with forward sweep CSV files.
+        backward_dir: Directory with backward sweep CSV files.
+        output_dir: Output directory for plots and statistics.
+    """
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -89,7 +113,8 @@ def analyze_hysteresis(forward_dir: Path, backward_dir: Path, output_dir: Path):
     plt.close()
 
 
-def main():
+def main() -> None:
+    """Parse CLI arguments and run hysteresis analysis."""
     p = argparse.ArgumentParser(description="Analyze hysteresis K-sweep data")
     p.add_argument("--forward_dir", type=str, default="results/hysteresis/forward",
                    help="Directory with forward sweep CSVs")

@@ -9,11 +9,20 @@ import csv
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from functools import partial
+from typing import Tuple
 
 SCRIPT_DIR = Path(__file__).parent
 
 
-def save_final_state(swarm, N, J, K, seed, state, log_path):
+def save_final_state(
+    swarm: "Swarm",
+    N: int,
+    J: float,
+    K: float,
+    seed: int,
+    state: str,
+    log_path: str | Path
+) -> None:
     """Append a summary row for the current simulation state.
 
     Args:
@@ -62,7 +71,16 @@ def save_final_state(swarm, N, J, K, seed, state, log_path):
 
 
 
-def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
+def run_once(
+    N: int,
+    J: float,
+    K: float,
+    seed: int,
+    dt: float,
+    steps: int,
+    burnin: int,
+    sample_every: int
+) -> str:
     """Run a single simulation and return a CSV-formatted summary line.
 
     Args:
@@ -111,9 +129,8 @@ def run_once(N, J, K, seed, dt, steps, burnin, sample_every):
     return f"{N},{J},{K},{seed},{R_parameter},{S_parameter},{V_parameter},{omega_parameter},{state}"
 
 
-def _run_once_wrapper(params):
-    """
-    Wrapper for run_once to unpack tuple arguments for multiprocessing.
+def _run_once_wrapper(params: Tuple[int, float, float, int, float, int, int, int]) -> str:
+    """Wrapper for run_once to unpack tuple arguments for multiprocessing.
     
     Args:
         params: Tuple of (N, J, K, seed, dt, steps, burnin, sample_every).
@@ -125,7 +142,7 @@ def _run_once_wrapper(params):
     return run_once(N, J, K, seed, dt, steps, burnin, sample_every)
 
 
-def main():
+def main() -> None:
     """Parse CLI arguments and execute single runs or parameter sweeps."""
     p = argparse.ArgumentParser()
     p.add_argument("--N", type=int)

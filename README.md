@@ -44,6 +44,59 @@ source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate on Windows
 ```
 
+> **Note for Windows Users (OneDrive):** If you encounter file permission errors (e.g., `os error 32` or hardlink failures), use copy mode:
+>
+> ```bash
+> uv sync --link-mode=copy
+> ```
+
+### Alternative Installation (pip)
+
+If you prefer standard `pip` or encounter issues with `uv`:
+
+```bash
+# Create and activate virtual environment
+python -m venv .venv
+# On Windows: .venv\Scripts\activate
+# On Mac/Linux: source .venv/bin/activate
+
+# Install dependencies from pyproject.toml
+pip install .
+```
+
+## Documentation
+
+API documentation is auto-generated from docstrings using [pdoc](https://pdoc.dev/).
+
+### View Documentation
+
+Open the pre-generated docs directly:
+
+```bash
+# Windows
+start docs\index.html
+
+# Mac/Linux
+open docs/index.html
+```
+
+Or launch a live server with auto-refresh:
+
+```bash
+pdoc src hpc
+```
+
+This opens at <http://localhost:8080>
+
+### Regenerate Documentation
+
+After modifying docstrings, regenerate the HTML files:
+
+```bash
+pip install pdoc  # if not installed
+pdoc src hpc -o docs
+```
+
 ## Usage Examples
 
 The core simulation is controlled via the `src/run.py` CLI.
@@ -106,6 +159,13 @@ All code has been manually reviewed and tested. The core physics implementation 
 
 ## Directory Structure
 
+Both `src/` and `hpc/` are Python packages with `__init__.py` files, enabling clean imports:
+
+```python
+from src.swarm import Swarm
+from src.plots import plot_phase_heatmap
+```
+
 ### `src/` - Core Simulation Library
 
 The core Python implementation of the Swarmalator model.
@@ -137,10 +197,8 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 
 | File | Description |
 | --- | --- |
-| `run.py` | Parallel J/K parameter sweep with multiprocessing |
-| `run_ksweep.py` | Continuous K-sweep for observing phase transitions |
+| `run_ksweep.py` | Continuous K-sweep for observing phase transitions (imports from `src/swarm.py`) |
 | `run_hysteresis.py` | Forward + backward sweeps to detect hysteresis |
-| `swarm.py` | Core Swarmalator model with Numba acceleration |
 
 **Analysis Scripts (`hpc/analysis/`):**
 
@@ -175,7 +233,7 @@ python hpc/run_ksweep.py \
   --output hpc/results/test/ksweep_N50.csv
 
 # Parameter sweep (outputs to stdout, redirect to file)
-python hpc/run.py \
+python -m src.run \
   --N 30 \
   --sweep \
   --Jmin 0.5 --Jmax 1.0 --Jsteps 5 \
@@ -237,7 +295,7 @@ python hpc/analysis/analyze_hysteresis.py \
 Browser-based interactive swarmalator simulation.
 
 | File | Description |
-|------|-------------|
+| --- | --- |
 | `index.html` | Main page with controls and visualization canvas |
 | `simulation.js` | JavaScript implementation of swarmalator dynamics |
 | `style.css` | Styling for the demo interface |
@@ -260,15 +318,3 @@ open demo/index.html
 python -m http.server 8000 --directory demo
 # Then visit http://localhost:8000
 ```
-
----
-
-## AI Usage
-
-This project was developed with assistance from AI tools Claude/Gemini for:
-
-- **Code development**: Assistance with code runtime optimization and debugging
-- **Documentation**: README structure and code comments
-- **Interactive demo**: Help with the JavaScript implementation of the web-based visualization and UI design
-
-AI has not been used for any scientific analysis or data interpretation (except for code refactoring). All code has been manually strucured, reviewed and tested. The simulation implementation and experiments are self implemented.

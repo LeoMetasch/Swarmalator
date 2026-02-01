@@ -8,10 +8,19 @@ import subprocess
 import sys
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
+from typing import Tuple
 
 
-def run_single_sweep(args):
-    """Run a single K-sweep with the given parameters."""
+def run_single_sweep(args: Tuple[str, int, str]) -> bool:
+    """Run a single K-sweep subprocess with the given parameters.
+    
+    Args:
+        args: Tuple of (direction, seed, base_dir) where direction is 'forward' or 'backward',
+              seed is the random seed, and base_dir is the output directory.
+    
+    Returns:
+        True if the sweep completed successfully, False otherwise.
+    """
     direction, seed, base_dir = args
     
     if direction == "forward":
@@ -46,7 +55,8 @@ def run_single_sweep(args):
     return True
 
 
-def main():
+def main() -> None:
+    """Parse CLI arguments and run parallel hysteresis sweeps."""
     parser = argparse.ArgumentParser(description="Run parallel hysteresis sweeps")
     parser.add_argument("--n_seeds", type=int, default=30, help="Number of seeds per direction")
     parser.add_argument("--n_workers", type=int, default=None, 

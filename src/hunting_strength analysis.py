@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 from swarm import Swarm
+from typing import Optional, Dict, List, Any, Tuple
 
 
 # =============================================================================
@@ -24,10 +25,10 @@ def experiment_hunting_strength_impact(
     dt: float = 0.1,
     burnin_steps: int = 3000,
     predator_steps: int = 5000,
-    hunting_strengths: list = None,
+    hunting_strengths: Optional[List[float]] = None,
     seed: int = 42,
     save_dir: str = "results/hunting_strength",
-):
+) -> Dict[float, Dict[str, List[Any]]]:
     """
     Analyze the impact of hunting strength on order parameters.
     
@@ -151,15 +152,32 @@ def experiment_relaxation_speed(
     burnin_steps: int = 1000,
     predator_steps: int = 1000,
     relaxation_steps: int = 1500,
-    hunting_strengths: list = None,
+    hunting_strengths: Optional[List[float]] = None,
     stability_threshold: float = 0.002,
     stability_window: int = 100,
     seed: int = 42,
     save_dir: str = "results/relaxation",
-):
-    """
-    Measure relaxation time after predator removal.
-    Now tracks V over the ENTIRE simulation (burnin + predator + relaxation).
+) -> Tuple[Dict[float, int], Dict[float, Dict[str, List[float]]]]:
+    """Measure relaxation time after predator removal.
+    
+    Tracks V over the ENTIRE simulation (burnin + predator + relaxation).
+    
+    Args:
+        N: Number of swarmalators.
+        J: Phase attraction strength.
+        K: Spatial coupling strength.
+        dt: Time step.
+        burnin_steps: Steps to reach stable phase wave before predator.
+        predator_steps: Steps to run with predator active.
+        relaxation_steps: Steps to run after removing predator.
+        hunting_strengths: List of hunting strength values to test.
+        stability_threshold: V/omega threshold for stability detection.
+        stability_window: Number of consecutive stable steps required.
+        seed: Random seed.
+        save_dir: Directory to save results.
+    
+    Returns:
+        Tuple of (relaxation_times dict, full_traces dict).
     """
     if hunting_strengths is None:
         hunting_strengths = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0]

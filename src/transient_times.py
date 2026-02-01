@@ -80,7 +80,7 @@ def combine_logs_to_transient_times(
     window_size: int = 50,
     threshold: float = 0.01,
     require_all: bool = True
-):
+) -> None:
     """
     Process all log CSVs in a directory to compute transient times and save summary.
 
@@ -253,7 +253,7 @@ def apply_mser_to_csv(csv_path: str) -> dict:
 def combine_logs_mser(
     log_dir: str,
     output_csv: str
-):
+) -> None:
     """Process all log files with MSER and save a summary CSV.
 
     Args:

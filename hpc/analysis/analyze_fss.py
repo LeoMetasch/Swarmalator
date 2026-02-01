@@ -15,8 +15,18 @@ from scipy.optimize import curve_fit
 from scipy.signal import savgol_filter
 
 
+from typing import Optional, Tuple
+
+
 def load_ksweep_data(filepath: Path) -> pd.DataFrame:
-    """Load K-sweep CSV and compute per-K statistics."""
+    """Load K-sweep CSV and compute per-K statistics.
+    
+    Args:
+        filepath: Path to the K-sweep CSV file.
+    
+    Returns:
+        DataFrame with per-K aggregated statistics.
+    """
     df = pd.read_csv(filepath)
     
     # Group by K and compute statistics
@@ -31,7 +41,25 @@ def load_ksweep_data(filepath: Path) -> pd.DataFrame:
     return stats
 
 
-def find_critical_K(df: pd.DataFrame, column='chi_S', method='peak', threshold=0.1, **kwargs):
+def find_critical_K(
+    df: pd.DataFrame,
+    column: str = 'chi_S',
+    method: str = 'peak',
+    threshold: float = 0.1,
+    **kwargs
+) -> Tuple[Optional[float], Optional[float], Optional[int]]:
+    """Find the critical K value using specified method.
+    
+    Args:
+        df: DataFrame with K and order parameter columns.
+        column: Column name to analyze for criticality.
+        method: Detection method ('peak', 'threshold', or 'rolling_threshold').
+        threshold: Threshold value for threshold-based methods.
+        **kwargs: Additional arguments (e.g., window for rolling methods).
+    
+    Returns:
+        Tuple of (K_c, value_at_Kc, index) or (None, None, None) if not found.
+    """
     if method == 'peak':
         if len(df) > 5:
             smoothed = savgol_filter(df[column].values, min(11, len(df) // 2 * 2 + 1), 3)
@@ -60,9 +88,13 @@ def find_critical_K(df: pd.DataFrame, column='chi_S', method='peak', threshold=0
     return None, None, None
 
 
-def analyze_fss(data_dir: Path, N_values: list, output_dir: Path):
-    """
-    Perform finite-size scaling analysis on multiple N datasets.
+def analyze_fss(data_dir: Path, N_values: list, output_dir: Path) -> None:
+    """Perform finite-size scaling analysis on multiple N datasets.
+    
+    Args:
+        data_dir: Directory containing K-sweep CSV files.
+        N_values: List of N values to analyze.
+        output_dir: Output directory for results and plots.
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -186,7 +218,8 @@ def analyze_fss(data_dir: Path, N_values: list, output_dir: Path):
     plt.savefig(output_dir / 'fss_analysis.png', dpi=150)
     plt.close()
 
-def main():
+def main() -> None:
+    """Parse CLI arguments and run finite-size scaling analysis."""
     p = argparse.ArgumentParser()
     p.add_argument("--data_dir", type=str, default="results/fss")
     p.add_argument("--N_values", type=int, nargs='+', default=[100, 200, 400])

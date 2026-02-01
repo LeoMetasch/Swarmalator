@@ -13,8 +13,14 @@ from scipy import stats
 from glob import glob
 
 
-def analyze_beta(data_dir: Path, Kc_file: Path, output_dir: Path):
-    """Extract β exponent from K-sweep data via log-log fit."""
+def analyze_beta(data_dir: Path, Kc_file: Path, output_dir: Path) -> None:
+    """Extract β exponent from K-sweep data via log-log fit.
+    
+    Args:
+        data_dir: Directory containing K-sweep CSV files.
+        Kc_file: JSON file containing the critical K value.
+        output_dir: Output directory for results and plots.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     
     with open(Kc_file) as f:
@@ -102,7 +108,8 @@ def analyze_beta(data_dir: Path, Kc_file: Path, output_dir: Path):
     plt.close()
 
 
-def main():
+def main() -> None:
+    """Parse CLI arguments and run the critical exponent β analysis."""
     p = argparse.ArgumentParser(description="Extract critical exponent β")
     p.add_argument("--data_dir", type=str, default="results/exp1_beta",
                    help="Directory containing K-sweep CSV files")

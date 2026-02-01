@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 import numpy as np
 
-# Add parent directory to path for imports
+# Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from swarm import Swarm
+from src.swarm import Swarm
 
 
 def run_ksweep(
@@ -27,7 +27,7 @@ def run_ksweep(
     seed: int,
     output_path: Path,
     independent: bool = False,
-):
+) -> None:
     """
     Run K-sweep with discrete K steps, logging all dynamics.
     
@@ -149,7 +149,8 @@ def run_ksweep(
     print(f"\nResults saved to: {output_path}", file=sys.stderr)
 
 
-def main():
+def main() -> None:
+    """Parse CLI arguments and run the K-sweep experiment."""
     p = argparse.ArgumentParser(description="K-sweep for observing phase transitions")
     p.add_argument("--N", type=int, default=100, help="Number of swarmalators")
     p.add_argument("--J", type=float, default=0.5, help="Fixed spatial coupling")
