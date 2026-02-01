@@ -10,9 +10,7 @@ src/__pycache__/
 ##############################
 
 logs/
-final_states/
-plots/
-results_data/
+
 
 # C extensions
 *.so
