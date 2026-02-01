@@ -6,8 +6,8 @@
 
 - Swarmalators with variable phase coupling strength
 - Swarmalators with variable internal phase change rates
-- Swarmalators with intirsic movement based on internal phase change
-- Predator implementation with varbiable hunting strengh
+- Swarmalators with intrinsic movement based on internal phase change
+- Predator implementation with variable hunting strength
 
 ## Project Summary
 
@@ -31,7 +31,7 @@ The system exhibits diverse collective states depending on coupling parameters J
 - **Active/Static Phase Wave**: Correlated spatial-phase patterns
 - **Splintered Phase Wave**: Fragmented phase clusters
 
-![alt text](image.png)
+![Phase diagram](docs/image.png)
 
 ## Installation
 

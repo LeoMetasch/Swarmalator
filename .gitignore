@@ -10,6 +10,7 @@ src/__pycache__/
 ##############################
 
 logs/
+test.csv
 
 
 # C extensions
