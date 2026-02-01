@@ -36,13 +36,13 @@ def save_final_state(
     """
     assert N > 0, f"N must be positive, got {N}"
     assert swarm.N == N, f"swarm.N ({swarm.N}) != N ({N})"
-    
+
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state", "seed"]
     is_new_file = not log_path.exists()
 
-    
+
 
     with log_path.open("a", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
@@ -94,7 +94,7 @@ def run_once(
     assert dt > 0, f"dt must be positive, got {dt}"
     assert steps >= 0, f"steps must be non-negative, got {steps}"
     assert sample_every > 0, f"sample_every must be positive, got {sample_every}"
-    
+
     np.random.seed(seed)
 
     # x = np.random.uniform(-1.0, 1.0, N)
@@ -130,7 +130,7 @@ def run_once(
 
 def _run_once_wrapper(params: Tuple[int, float, float, int, float, int, int, int]) -> str:
     """Wrapper for run_once to unpack tuple arguments for multiprocessing.
-    
+
     Args:
         params: Tuple of (N, J, K, seed, dt, steps, burnin, sample_every).
 
@@ -162,7 +162,7 @@ def main() -> None:
     p.add_argument("--Kmin", type=float, default=-.8)
     p.add_argument("--Kmax", type=float, default=.2)
     p.add_argument("--Ksteps", type=int, default=51)
-    p.add_argument("--workers", type=int, default=None, 
+    p.add_argument("--workers", type=int, default=None,
                    help="Number of parallel workers (default: number of CPU cores)")
 
     args = p.parse_args()
@@ -188,7 +188,7 @@ def main() -> None:
 
         print(f"Running {len(param_list)} simulations with {n_workers} workers...", file=__import__('sys').stderr)
         print("N,J,K,seed,R,S,V,omega,state")
-        
+
         with Pool(processes=n_workers) as pool:
             results = pool.map(_run_once_wrapper, param_list)
 

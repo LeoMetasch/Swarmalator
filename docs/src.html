@@ -161,7 +161,7 @@ src    </h1>
                 <section id="Swarm">
                             <input id="Swarm-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr class">
-            
+
     <span class="def">class</span>
     <span class="name">Swarm</span>:
 
@@ -228,7 +228,7 @@ src    </h1>
 </span><span id="Swarm-166"><a href="#Swarm-166"><span class="linenos">166</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">predator</span> <span class="o">=</span> <span class="n">predator</span>
 </span><span id="Swarm-167"><a href="#Swarm-167"><span class="linenos">167</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">hunting_strength</span> <span class="o">=</span> <span class="n">hunting_strength</span>
 </span><span id="Swarm-168"><a href="#Swarm-168"><span class="linenos">168</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">use_numba</span> <span class="o">=</span> <span class="n">use_numba</span>
-</span><span id="Swarm-169"><a href="#Swarm-169"><span class="linenos">169</span></a>        
+</span><span id="Swarm-169"><a href="#Swarm-169"><span class="linenos">169</span></a>
 </span><span id="Swarm-170"><a href="#Swarm-170"><span class="linenos">170</span></a>        <span class="c1"># State Initialization</span>
 </span><span id="Swarm-171"><a href="#Swarm-171"><span class="linenos">171</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 </span><span id="Swarm-172"><a href="#Swarm-172"><span class="linenos">172</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">nat_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_omega</span><span class="p">(</span><span class="n">freq_mode</span><span class="p">)</span>
@@ -315,16 +315,16 @@ src    </h1>
 </span><span id="Swarm-253"><a href="#Swarm-253"><span class="linenos">253</span></a>        <span class="n">dx_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_x</span>
 </span><span id="Swarm-254"><a href="#Swarm-254"><span class="linenos">254</span></a>        <span class="n">dy_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_y</span>
 </span><span id="Swarm-255"><a href="#Swarm-255"><span class="linenos">255</span></a>        <span class="n">dist_sq_all</span> <span class="o">=</span> <span class="n">dx_all</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dy_all</span><span class="o">**</span><span class="mi">2</span>
-</span><span id="Swarm-256"><a href="#Swarm-256"><span class="linenos">256</span></a>        
+</span><span id="Swarm-256"><a href="#Swarm-256"><span class="linenos">256</span></a>
 </span><span id="Swarm-257"><a href="#Swarm-257"><span class="linenos">257</span></a>        <span class="n">nearest_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dist_sq_all</span><span class="p">)</span>
-</span><span id="Swarm-258"><a href="#Swarm-258"><span class="linenos">258</span></a>        
+</span><span id="Swarm-258"><a href="#Swarm-258"><span class="linenos">258</span></a>
 </span><span id="Swarm-259"><a href="#Swarm-259"><span class="linenos">259</span></a>        <span class="n">target_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_pos</span><span class="p">[</span><span class="n">nearest_idx</span><span class="p">]</span>
 </span><span id="Swarm-260"><a href="#Swarm-260"><span class="linenos">260</span></a>        <span class="n">target_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pos</span><span class="p">[</span><span class="n">nearest_idx</span><span class="p">]</span>
-</span><span id="Swarm-261"><a href="#Swarm-261"><span class="linenos">261</span></a>        
+</span><span id="Swarm-261"><a href="#Swarm-261"><span class="linenos">261</span></a>
 </span><span id="Swarm-262"><a href="#Swarm-262"><span class="linenos">262</span></a>        <span class="n">hunt_dx</span> <span class="o">=</span> <span class="n">target_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_x</span>
 </span><span id="Swarm-263"><a href="#Swarm-263"><span class="linenos">263</span></a>        <span class="n">hunt_dy</span> <span class="o">=</span> <span class="n">target_y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pred_y</span>
 </span><span id="Swarm-264"><a href="#Swarm-264"><span class="linenos">264</span></a>        <span class="n">hunt_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">hunt_dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">hunt_dy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span>
-</span><span id="Swarm-265"><a href="#Swarm-265"><span class="linenos">265</span></a>        
+</span><span id="Swarm-265"><a href="#Swarm-265"><span class="linenos">265</span></a>
 </span><span id="Swarm-266"><a href="#Swarm-266"><span class="linenos">266</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">pred_x</span> <span class="o">+=</span> <span class="p">(</span><span class="n">hunt_dx</span> <span class="o">/</span> <span class="n">hunt_dist</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
 </span><span id="Swarm-267"><a href="#Swarm-267"><span class="linenos">267</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">pred_y</span> <span class="o">+=</span> <span class="p">(</span><span class="n">hunt_dy</span> <span class="o">/</span> <span class="n">hunt_dist</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
 </span><span id="Swarm-268"><a href="#Swarm-268"><span class="linenos">268</span></a>
@@ -335,7 +335,7 @@ src    </h1>
 </span><span id="Swarm-273"><a href="#Swarm-273"><span class="linenos">273</span></a>        <span class="n">d_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_pred2</span><span class="p">)</span>
 </span><span id="Swarm-274"><a href="#Swarm-274"><span class="linenos">274</span></a>
 </span><span id="Swarm-275"><a href="#Swarm-275"><span class="linenos">275</span></a>        <span class="n">repulsion_mag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hunting_strength</span> <span class="o">/</span> <span class="n">d_pred2</span>
-</span><span id="Swarm-276"><a href="#Swarm-276"><span class="linenos">276</span></a>        
+</span><span id="Swarm-276"><a href="#Swarm-276"><span class="linenos">276</span></a>
 </span><span id="Swarm-277"><a href="#Swarm-277"><span class="linenos">277</span></a>        <span class="c1"># Apply predator repulsion to positions</span>
 </span><span id="Swarm-278"><a href="#Swarm-278"><span class="linenos">278</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">x_pos</span> <span class="o">+=</span> <span class="p">(</span><span class="n">pred_dx</span> <span class="o">/</span> <span class="n">d_pred</span><span class="p">)</span> <span class="o">*</span> <span class="n">repulsion_mag</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
 </span><span id="Swarm-279"><a href="#Swarm-279"><span class="linenos">279</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">y_pos</span> <span class="o">+=</span> <span class="p">(</span><span class="n">pred_dy</span> <span class="o">/</span> <span class="n">d_pred</span><span class="p">)</span> <span class="o">*</span> <span class="n">repulsion_mag</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
@@ -351,19 +351,19 @@ src    </h1>
 </span><span id="Swarm-289"><a href="#Swarm-289"><span class="linenos">289</span></a>        <span class="k">else</span><span class="p">:</span>
 </span><span id="Swarm-290"><a href="#Swarm-290"><span class="linenos">290</span></a>            <span class="n">Q_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_x</span>
 </span><span id="Swarm-291"><a href="#Swarm-291"><span class="linenos">291</span></a>            <span class="n">Q_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q_theta</span>
-</span><span id="Swarm-292"><a href="#Swarm-292"><span class="linenos">292</span></a>        
+</span><span id="Swarm-292"><a href="#Swarm-292"><span class="linenos">292</span></a>
 </span><span id="Swarm-293"><a href="#Swarm-293"><span class="linenos">293</span></a>        <span class="c1"># Call JIT-compiled kernel</span>
 </span><span id="Swarm-294"><a href="#Swarm-294"><span class="linenos">294</span></a>        <span class="n">new_phases</span><span class="p">,</span> <span class="n">new_x</span><span class="p">,</span> <span class="n">new_y</span> <span class="o">=</span> <span class="n">_step_kernel_numba</span><span class="p">(</span>
 </span><span id="Swarm-295"><a href="#Swarm-295"><span class="linenos">295</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">x_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">phases</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nat_freq</span><span class="p">,</span>
 </span><span id="Swarm-296"><a href="#Swarm-296"><span class="linenos">296</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span>
 </span><span id="Swarm-297"><a href="#Swarm-297"><span class="linenos">297</span></a>            <span class="n">Q_x</span><span class="p">,</span> <span class="n">Q_theta</span><span class="p">,</span> <span class="n">is_scalar_Q</span>
 </span><span id="Swarm-298"><a href="#Swarm-298"><span class="linenos">298</span></a>        <span class="p">)</span>
-</span><span id="Swarm-299"><a href="#Swarm-299"><span class="linenos">299</span></a>        
+</span><span id="Swarm-299"><a href="#Swarm-299"><span class="linenos">299</span></a>
 </span><span id="Swarm-300"><a href="#Swarm-300"><span class="linenos">300</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">new_phases</span>
 </span><span id="Swarm-301"><a href="#Swarm-301"><span class="linenos">301</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">x_pos</span> <span class="o">=</span> <span class="n">new_x</span>
 </span><span id="Swarm-302"><a href="#Swarm-302"><span class="linenos">302</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">y_pos</span> <span class="o">=</span> <span class="n">new_y</span>
 </span><span id="Swarm-303"><a href="#Swarm-303"><span class="linenos">303</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_velocities</span><span class="p">()</span>
-</span><span id="Swarm-304"><a href="#Swarm-304"><span class="linenos">304</span></a>        
+</span><span id="Swarm-304"><a href="#Swarm-304"><span class="linenos">304</span></a>
 </span><span id="Swarm-305"><a href="#Swarm-305"><span class="linenos">305</span></a>        <span class="c1"># Handle predator separately (already O(N))</span>
 </span><span id="Swarm-306"><a href="#Swarm-306"><span class="linenos">306</span></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predator</span><span class="p">:</span>
 </span><span id="Swarm-307"><a href="#Swarm-307"><span class="linenos">307</span></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_step_predator</span><span class="p">()</span>
@@ -943,7 +943,7 @@ src    </h1>
                             <div id="Swarm.__init__" class="classattr">
                                         <input id="Swarm.__init__-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="name">Swarm</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">N</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">dt</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">J</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">K</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">chirality</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">freq_mode</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">swarm</span><span class="o">.</span><span class="n">FrecMode</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">FrecMode</span><span class="o">.</span><span class="n">ZERO</span><span class="p">:</span> <span class="s1">&#39;zero&#39;</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">phase_coupling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">predator</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">hunting_strength</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>,</span><span class="param">	<span class="n">use_numba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></span>)</span>
 
                 <label class="view-source-button" for="Swarm.__init__-view-source"><span>View Source</span></label>
@@ -992,7 +992,7 @@ src    </h1>
 </span><span id="Swarm.__init__-166"><a href="#Swarm.__init__-166"><span class="linenos">166</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">predator</span> <span class="o">=</span> <span class="n">predator</span>
 </span><span id="Swarm.__init__-167"><a href="#Swarm.__init__-167"><span class="linenos">167</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">hunting_strength</span> <span class="o">=</span> <span class="n">hunting_strength</span>
 </span><span id="Swarm.__init__-168"><a href="#Swarm.__init__-168"><span class="linenos">168</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">use_numba</span> <span class="o">=</span> <span class="n">use_numba</span>
-</span><span id="Swarm.__init__-169"><a href="#Swarm.__init__-169"><span class="linenos">169</span></a>        
+</span><span id="Swarm.__init__-169"><a href="#Swarm.__init__-169"><span class="linenos">169</span></a>
 </span><span id="Swarm.__init__-170"><a href="#Swarm.__init__-170"><span class="linenos">170</span></a>        <span class="c1"># State Initialization</span>
 </span><span id="Swarm.__init__-171"><a href="#Swarm.__init__-171"><span class="linenos">171</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
 </span><span id="Swarm.__init__-172"><a href="#Swarm.__init__-172"><span class="linenos">172</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">nat_freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_omega</span><span class="p">(</span><span class="n">freq_mode</span><span class="p">)</span>
@@ -1040,193 +1040,193 @@ src    </h1>
                                 <div class="attr variable">
             <span class="name">N</span><span class="annotation">: int</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.N"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.dt" class="classattr">
                                 <div class="attr variable">
             <span class="name">dt</span><span class="annotation">: float</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.dt"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.eps" class="classattr">
                                 <div class="attr variable">
             <span class="name">eps</span><span class="annotation">: float</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.eps"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.phases" class="classattr">
                                 <div class="attr variable">
             <span class="name">phases</span><span class="annotation">: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.float64]]</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.phases"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.nat_freq" class="classattr">
                                 <div class="attr variable">
             <span class="name">nat_freq</span><span class="annotation">: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.float64]]</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.nat_freq"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.x_pos" class="classattr">
                                 <div class="attr variable">
             <span class="name">x_pos</span><span class="annotation">: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.float64]]</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.x_pos"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.y_pos" class="classattr">
                                 <div class="attr variable">
             <span class="name">y_pos</span><span class="annotation">: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.float64]]</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.y_pos"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.velocities" class="classattr">
                                 <div class="attr variable">
             <span class="name">velocities</span><span class="annotation">: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.float64]]</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.velocities"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.chirality" class="classattr">
                                 <div class="attr variable">
             <span class="name">chirality</span><span class="annotation">: bool</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.chirality"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.freq_mode" class="classattr">
                                 <div class="attr variable">
             <span class="name">freq_mode</span><span class="annotation">: src.swarm.FrecMode</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.freq_mode"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.predator" class="classattr">
                                 <div class="attr variable">
             <span class="name">predator</span><span class="annotation">: bool</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.predator"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.J" class="classattr">
                                 <div class="attr variable">
             <span class="name">J</span><span class="annotation">: float</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.J"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.K" class="classattr">
                                 <div class="attr variable">
             <span class="name">K</span><span class="annotation">: float</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.K"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.steps" class="classattr">
                                 <div class="attr variable">
             <span class="name">steps</span><span class="annotation">: int</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.steps"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.phase_coupling" class="classattr">
                                 <div class="attr variable">
             <span class="name">phase_coupling</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.phase_coupling"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.hunting_strength" class="classattr">
                                 <div class="attr variable">
             <span class="name">hunting_strength</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.hunting_strength"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.use_numba" class="classattr">
                                 <div class="attr variable">
             <span class="name">use_numba</span>
 
-        
+
     </div>
     <a class="headerlink" href="#Swarm.use_numba"></a>
-    
-    
+
+
 
                             </div>
                             <div id="Swarm.phase_calc" class="classattr">
                                         <input id="Swarm.phase_calc-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">phase_calc</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">tuple</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span>:</span></span>
 
@@ -1270,7 +1270,7 @@ src    </h1>
                             <div id="Swarm.update_velocities" class="classattr">
                                         <input id="Swarm.update_velocities-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">update_velocities</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">tuple</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]]]</span>:</span></span>
 
@@ -1302,7 +1302,7 @@ src    </h1>
                             <div id="Swarm.step" class="classattr">
                                         <input id="Swarm.step-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">step</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
@@ -1327,7 +1327,7 @@ src    </h1>
                             <div id="Swarm.splinter_diagnostics" class="classattr">
                                         <input id="Swarm.splinter_diagnostics-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">splinter_diagnostics</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">k_min</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>,</span><span class="param">	<span class="n">k_max</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12</span>,</span><span class="param">	<span class="n">min_frac</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>,</span><span class="param">	<span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>,</span><span class="param">	<span class="n">k_penalty</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span></span><span class="return-annotation">) -> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">]]]]</span>:</span></span>
 
@@ -1428,7 +1428,7 @@ score penalizes large k and highly anisotropic (arc-like) spatial clusters.</p>
                             <div id="Swarm.stability_analysis" class="classattr">
                                         <input id="Swarm.stability_analysis-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">stability_analysis</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>:</span></span>
 
@@ -1510,7 +1510,7 @@ score penalizes large k and highly anisotropic (arc-like) spatial clusters.</p>
                             <div id="Swarm.run_with_logging" class="classattr">
                                         <input id="Swarm.run_with_logging-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">run_with_logging</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">steps</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">log_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">_local</span><span class="o">.</span><span class="n">Path</span>,</span><span class="param">	<span class="n">log_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
@@ -1589,7 +1589,7 @@ score penalizes large k and highly anisotropic (arc-like) spatial clusters.</p>
                             <div id="Swarm.animate" class="classattr">
                                         <input id="Swarm.animate-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">animate</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">steps</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
@@ -1630,7 +1630,7 @@ score penalizes large k and highly anisotropic (arc-like) spatial clusters.</p>
                             <div id="Swarm.simulate_video" class="classattr">
                                         <input id="Swarm.simulate_video-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
-            
+
         <span class="def">def</span>
         <span class="name">simulate_video</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;swarm_simulation.mp4&#39;</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>,</span><span class="param">	<span class="n">dpi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>,</span><span class="param">	<span class="n">fps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>,</span><span class="param">	<span class="n">predator_start_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">predator_end_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 

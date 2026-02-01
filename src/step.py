@@ -75,9 +75,9 @@ for t in range(steps):
     x, y, theta = step(x, y, theta, dt, J, K)
 
     if t % 10 == 0:
-        plt.clf()  
+        plt.clf()
         plt.scatter(x, y, c=theta, cmap="hsv")
-        plt.xlim(-2.5, 2.5) 
+        plt.xlim(-2.5, 2.5)
         plt.ylim(-2.5, 2.5)
         plt.title(f"t = {t}")
         plt.legend(["Particles colored by phase"])

@@ -14,7 +14,7 @@ from numba import njit, prange
 @njit(parallel=True, fastmath=True, cache=True)
 def _step_kernel_numba(
     x_pos: np.ndarray,
-    y_pos: np.ndarray, 
+    y_pos: np.ndarray,
     phases: np.ndarray,
     nat_freq: np.ndarray,
     vx: np.ndarray,
@@ -52,23 +52,23 @@ def _step_kernel_numba(
     xdot = np.zeros(N)
     ydot = np.zeros(N)
     thetadot = nat_freq.copy()
-    
+
     for i in prange(N):
         sum_x = 0.0
         sum_y = 0.0
         sum_theta = 0.0
-        
+
         for j in range(N):
             if i == j:
                 continue
-                
+
             dx = x_pos[j] - x_pos[i]
             dy = y_pos[j] - y_pos[i]
             dtheta = phases[j] - phases[i]
-            
+
             dist2 = dx * dx + dy * dy
             dist = np.sqrt(dist2)
-            
+
             # Handle Q_x and Q_theta (scalar 0.0 or matrix)
             if is_scalar_Q:
                 q_x = 0.0
@@ -76,27 +76,27 @@ def _step_kernel_numba(
             else:
                 q_x = Q_x[i, j]
                 q_theta = Q_theta[i, j]
-            
+
             c = np.cos(dtheta - q_x)
             s = np.sin(dtheta - q_theta)
-            
+
             coef = (1.0 + J * c) / (dist + eps) - 1.0 / (dist2 + eps)
-            
+
             sum_x += dx * coef
             sum_y += dy * coef
             sum_theta += K * s / (dist + eps)
-        
+
         xdot[i] = vx[i] + sum_x / N
         ydot[i] = vy[i] + sum_y / N
         thetadot[i] = nat_freq[i] + sum_theta / N
-    
+
     # Update positions and phases
     new_phases = phases + thetadot * dt
     # Wrap phases to [-pi, pi]
     new_phases = np.mod(new_phases + np.pi, 2 * np.pi) - np.pi
     new_x = x_pos + xdot * dt
     new_y = y_pos + ydot * dt
-    
+
     return new_phases, new_x, new_y
 
 class FrecMode(Enum):
@@ -170,7 +170,7 @@ class Swarm:
         self.predator = predator
         self.hunting_strength = hunting_strength
         self.use_numba = use_numba
-        
+
         # State Initialization
         self.phases = np.random.uniform(-np.pi, np.pi, N)
         self.nat_freq = self._init_omega(freq_mode)
@@ -262,16 +262,16 @@ class Swarm:
         dx_all = self.x_pos - self.pred_x
         dy_all = self.y_pos - self.pred_y
         dist_sq_all = dx_all**2 + dy_all**2
-        
+
         nearest_idx = np.argmin(dist_sq_all)
-        
+
         target_x = self.x_pos[nearest_idx]
         target_y = self.y_pos[nearest_idx]
-        
+
         hunt_dx = target_x - self.pred_x
         hunt_dy = target_y - self.pred_y
         hunt_dist = np.sqrt(hunt_dx**2 + hunt_dy**2) + self.eps
-        
+
         self.pred_x += (hunt_dx / hunt_dist) * self.dt
         self.pred_y += (hunt_dy / hunt_dist) * self.dt
 
@@ -282,7 +282,7 @@ class Swarm:
         d_pred = np.sqrt(d_pred2)
 
         repulsion_mag = self.hunting_strength / d_pred2
-        
+
         # Apply predator repulsion to positions
         self.x_pos += (pred_dx / d_pred) * repulsion_mag * self.dt
         self.y_pos += (pred_dy / d_pred) * repulsion_mag * self.dt
@@ -298,19 +298,19 @@ class Swarm:
         else:
             Q_x = self.Q_x
             Q_theta = self.Q_theta
-        
+
         # Call JIT-compiled kernel
         new_phases, new_x, new_y = _step_kernel_numba(
             self.x_pos, self.y_pos, self.phases, self.nat_freq,
             self.vx, self.vy, self.J, self.K, self.N, self.dt, self.eps,
             Q_x, Q_theta, is_scalar_Q
         )
-        
+
         self.phases = new_phases
         self.x_pos = new_x
         self.y_pos = new_y
         self.vx, self.vy = self.update_velocities()
-        
+
         # Handle predator separately (already O(N))
         if self.predator:
             self._step_predator()
@@ -414,7 +414,7 @@ class Swarm:
         assert x_prev.shape == (self.N,), f"x_prev shape {x_prev.shape} != ({self.N},)"
         assert y_prev.shape == (self.N,), f"y_prev shape {y_prev.shape} != ({self.N},)"
         assert theta_prev.shape == (self.N,), f"theta_prev shape {theta_prev.shape} != ({self.N},)"
-        
+
         ############ Spatial velocity (V) ####################################
         # Ensure input arrays are float/compatible
         dx = self.x_pos - x_prev
@@ -470,7 +470,7 @@ class Swarm:
         """
         assert k >= 1, f"k must be at least 1, got {k}"
         assert theta.shape[0] > 0, "theta array cannot be empty"
-        
+
         rng = np.random.default_rng(seed)
         X = np.c_[np.cos(theta), np.sin(theta)]  # (N,2) points on the unit circle
 
@@ -520,7 +520,7 @@ class Swarm:
             separation: Dimensionless separation score (>= 0).
         """
         assert x.shape == y.shape == labels.shape, "x, y, labels shape mismatch"
-        
+
         k = int(labels.max()) + 1
         if k < 2:
             return 0.0

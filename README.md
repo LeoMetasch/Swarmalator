@@ -27,7 +27,7 @@ Swarmalators are particles that exhibit both collective swarming (spatial attrac
 The system exhibits diverse collective states depending on coupling parameters J (spatial) and K (phase):
 
 - **Static Sync**: Synchronized phases, stationary cluster
-- **Static Async**: Unsynchronized phases, stationary cluster  
+- **Static Async**: Unsynchronized phases, stationary cluster
 - **Active/Static Phase Wave**: Correlated spatial-phase patterns
 - **Splintered Phase Wave**: Fragmented phase clusters
 
@@ -38,7 +38,7 @@ The system exhibits diverse collective states depending on coupling parameters J
 Instead of a `requirements.txt` file, this project uses `uv` to manage dependencies. See `pyproject.toml` for details.
 
 ```bash
-uv venv 
+uv venv
 uv sync
 source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate on Windows

@@ -17,7 +17,7 @@ class TestRunOnce:
             N=20, J=1.0, K=0.0, seed=42,
             dt=0.1, steps=50, burnin=0, sample_every=10
         )
-        
+
         assert isinstance(result, str)
         parts = result.split(',')
         assert len(parts) == 9  # N, J, K, seed, R, S, V, omega, state
@@ -26,14 +26,14 @@ class TestRunOnce:
         """Test that run_once produces identical results with same seed."""
         result1 = run_once(N=20, J=1.0, K=0.0, seed=42, dt=0.1, steps=50, burnin=0, sample_every=10)
         result2 = run_once(N=20, J=1.0, K=0.0, seed=42, dt=0.1, steps=50, burnin=0, sample_every=10)
-        
+
         assert result1 == result2
 
     def test_run_once_different_seeds_different_results(self):
         """Test that different seeds produce different results."""
         result1 = run_once(N=20, J=1.0, K=0.0, seed=42, dt=0.1, steps=50, burnin=0, sample_every=10)
         result2 = run_once(N=20, J=1.0, K=0.0, seed=123, dt=0.1, steps=50, burnin=0, sample_every=10)
-        
+
         # Results should differ (at least in some columns)
         assert result1 != result2
 

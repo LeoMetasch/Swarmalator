@@ -22,7 +22,7 @@ LABELSIZE = 20
 TICKSIZE = 18
 
 def plot_phase_heatmap(
-    csv_path: str = "test.csv", 
+    csv_path: str = "test.csv",
     out_path: Optional[str] = "plots/heatmap_state.png"
 ) -> None:
     """
@@ -51,7 +51,7 @@ def plot_phase_heatmap(
 
     # Pivot the data: K on y-axis, J on x-axis
     pivot_df = df.pivot(index="J", columns="K", values="state")
-    
+
     # Sort index and columns to ensure correct axis ordering
     pivot_df = pivot_df.sort_index(ascending=True)
     pivot_df = pivot_df.sort_index(axis=1, ascending=True)
@@ -60,45 +60,45 @@ def plot_phase_heatmap(
     # Handle NaN if any
     unique_states = sorted([x for x in df['state'].unique() if pd.notna(x)])
     state_to_num = {state: i for i, state in enumerate(unique_states)}
-    
+
     # Map the pivot table to numbers
     pivot_num = pivot_df.map(lambda x: state_to_num.get(x, np.nan))
 
     # Define a discrete colormap
     colors = sns.color_palette("husl", len(unique_states))
     cmap = mcolors.ListedColormap(colors)
-    
+
     plt.figure(figsize=(10, 8))
-    
+
     ax = sns.heatmap(
-        pivot_num, 
-        cmap=cmap, 
-        cbar=False, 
-        xticklabels=5, 
+        pivot_num,
+        cmap=cmap,
+        cbar=False,
+        xticklabels=5,
         yticklabels=5
     )
-    
+
     # Correct the y-axis direction
     ax.invert_yaxis()
-    
+
     plt.title("Phase Diagram: State over J vs K", fontsize=TITLESIZE)
     plt.xlabel("K", fontsize=LABELSIZE)
     plt.ylabel("J", fontsize=LABELSIZE)
-    
+
     # Create the legend
     patches = [plt.Rectangle((0,0),1,1, color=colors[i]) for i in range(len(unique_states))]
     plt.legend(patches, unique_states, title="State", loc='upper left', bbox_to_anchor=(1, 1))
-    
+
     plt.tight_layout()
-    
+
     if out_path:
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
         print(f"State Heatmap saved to {out_path}")
-    
+
     # plt.show()
 
 def plot_param_heatmap(
-    csv_path: str = "test.csv", 
+    csv_path: str = "test.csv",
     param: str = "S",
     out_path: Optional[str] = "plots/heatmap_param.png"
 ) -> None:
@@ -136,32 +136,32 @@ def plot_param_heatmap(
 
     # Pivot: K (index), J (columns), values (param)
     pivot_df = df_agg.pivot(index="J", columns="K", values=param)
-    
+
     # Sort
-    pivot_df = pivot_df.sort_index(ascending=True) 
-    pivot_df = pivot_df.sort_index(axis=1, ascending=True) 
+    pivot_df = pivot_df.sort_index(ascending=True)
+    pivot_df = pivot_df.sort_index(axis=1, ascending=True)
 
     plt.figure(figsize=(10, 8))
-    
+
     ax = sns.heatmap(
-        pivot_df, 
-        cmap="viridis", 
+        pivot_df,
+        cmap="viridis",
         cbar_kws={'label': f'Mean {param}'},
         xticklabels=LABELSIZE,
         yticklabels=LABELSIZE
     )
-    
+
     ax.invert_yaxis()
     plt.title(f"Phase Diagram: Mean {param} over J vs K", fontsize=TITLESIZE)
     plt.xlabel("K", fontsize=LABELSIZE)
     plt.ylabel("J", fontsize=LABELSIZE)
-    
+
     plt.tight_layout()
-    
+
     if out_path:
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
         print(f"{param} Heatmap saved to {out_path}")
-    
+
     # plt.show()
 
 def plot_transient_time_summary(
@@ -186,33 +186,33 @@ def plot_transient_time_summary(
         df = df.groupby(['J', 'K'])['transient_time'].mean().reset_index()
 
     plt.figure(figsize=(10, 8))
-    
+
     pivot_df = df.pivot(index="J", columns="K", values="transient_time")
     pivot_df = pivot_df.sort_index(ascending=True)
     pivot_df = pivot_df.sort_index(axis=1, ascending=True)
 
     ax = sns.heatmap(
-        pivot_df, 
-        cmap="cividis", 
+        pivot_df,
+        cmap="cividis",
         cbar_kws={'label': 'Transient Time'},
         xticklabels=LABELSIZE,
         yticklabels=LABELSIZE
     )
-    
+
     ax.invert_yaxis()
     plt.title("Transient Time over J vs K", fontsize=TITLESIZE)
     plt.xlabel("K", fontsize=LABELSIZE)
     plt.ylabel("J", fontsize=LABELSIZE)
-    
+
     plt.tight_layout()
-    
+
     plt.savefig(out_path, dpi=300, bbox_inches='tight')
     print(f"Transient Time Heatmap saved to {out_path}")
-    
+
     # plt.show()
 
 def plot_transient_times(
-    csv_path: str = "results_data/transient_times_static_async.csv", 
+    csv_path: str = "results_data/transient_times_static_async.csv",
     out_path: Optional[str] = "transient_times.png"
 ) -> None:
     """Plot transient time versus $N$ with mean and confidence intervals (95%).
@@ -226,29 +226,29 @@ def plot_transient_times(
     except FileNotFoundError:
         print(f"Error: {csv_path} not found.")
         return
-        
+
     # If using the threshold method csv, filter for converged only
     if 'converged' in df.columns:
         df = df[df['converged'] == True]
 
     plt.figure(figsize=(10, 6))
-    
+
     # Plot line with confidence intervals
-    # sns.lineplot automatically aggregates multiple y values for the same x value 
+    # sns.lineplot automatically aggregates multiple y values for the same x value
     # and plots the mean and a confidence interval (default 95%)
     sns.lineplot(data=df, x="N", y="transient_time", marker="o", errorbar=('ci', 95))
-    
+
     plt.title("Transient Time vs N (J=0.2, K=-0.5)")
     plt.xlabel("N")
     plt.ylabel("Transient Time")
     plt.grid(True, linestyle="--", alpha=0.7)
-    
+
     plt.tight_layout()
-    
+
     if out_path:
         plt.savefig(out_path, dpi=300)
         print(f"Transient Time Plot saved to {out_path}")
-    
+
     # plt.show()
 
 def plot_order_parameters_vs_K(
@@ -271,9 +271,9 @@ def plot_order_parameters_vs_K(
 
     metrics = ['R', 'S', 'V', 'omega']
     titles = {
-        'R': 'Synchrony (R)', 
-        'S': 'Correlation (S)', 
-        'V': 'Mean Spatial Velocity (V)', 
+        'R': 'Synchrony (R)',
+        'S': 'Correlation (S)',
+        'V': 'Mean Spatial Velocity (V)',
         'omega': 'Mean Phase Velocity (omega)'
     }
 
@@ -284,7 +284,7 @@ def plot_order_parameters_vs_K(
         # df_j = df[np.isclose(df['J'], j_val)] if using floats carefully
         # Simple equality for now
         df_j = df[df['J'] == j_val].copy()
-        
+
         if df_j.empty:
             print(f"No data found for J={j_val}")
             continue
@@ -293,11 +293,11 @@ def plot_order_parameters_vs_K(
             ax = axes[i]
             if metric in df_j.columns:
                 sns.lineplot(
-                    data=df_j, 
-                    x='K', 
-                    y=metric, 
-                    ax=ax, 
-                    marker='o', 
+                    data=df_j,
+                    x='K',
+                    y=metric,
+                    ax=ax,
+                    marker='o',
                     errorbar=('ci', 95),
                     label=f"J={j_val}"
                 )
@@ -318,14 +318,14 @@ def plot_order_parameters_vs_K(
     if out_path:
         plt.savefig(out_path, dpi=300, bbox_inches='tight')
         print(f"Order Parameter Plot saved to {out_path}")
-    
+
     # plt.show()
 
 if __name__ == "__main__":
     # plot_transient_time_summary(csv_path="results_data/heatmap_transient_times_mser.csv", out_path="plots/heatmap_transient_times_mser.png")
     # plot_phase_heatmap(csv_path='N200_30_seed.csv', out_path="plots/N200_30_seed_heatmap.png")
     plot_transient_times(csv_path="results_data/static_async_transient_times_mser.csv", out_path="plots/static_async_transient_times_mser_300.png")
-    
+
     # Test averaged heatmap for S
     # plot_param_heatmap(csv_path='N200_30_seed.csv', param='V', out_path="plots/heatmap_V_avg.png")
     # plot_param_heatmap(csv_path='N200_30_seed.csv', param='S', out_path="plots/heatmap_S_avg.png")

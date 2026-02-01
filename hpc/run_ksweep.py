@@ -30,7 +30,7 @@ def run_ksweep(
 ) -> None:
     """
     Run K-sweep with discrete K steps, logging all dynamics.
-    
+
     Args:
         N: Number of swarmalators
         J: Fixed spatial coupling
@@ -48,9 +48,9 @@ def run_ksweep(
     assert dt > 0, f"dt must be positive, got {dt}"
     assert log_interval > 0, f"log_interval must be positive, got {log_interval}"
     assert dK != 0, "dK cannot be zero"
-    
+
     np.random.seed(seed)
-    
+
     # Generate K values (handles both forward and backward sweeps)
     if dK > 0:
         K_values = np.arange(K_min, K_max + dK/2, dK)
@@ -60,7 +60,7 @@ def run_ksweep(
     n_K = len(K_values)
     assert n_K > 0, f"K sweep generated no values (K_min={K_min}, K_max={K_max}, dK={dK})"
     total_steps = n_K * steps_per_K
-    
+
     # Initialize swarm (only once if not independent)
     if not independent:
         swarm = Swarm(
@@ -68,33 +68,33 @@ def run_ksweep(
             chirality=False, phase_coupling=False, predator=False,
             use_numba=True
         )
-    
+
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     fieldnames = [
         "step", "K", "t_at_K", "S", "R", "V", "omega", "state"
     ]
-    
+
     print(f"Starting K-sweep ({'INDEPENDENT' if independent else 'ADIABATIC'})", file=sys.stderr)
     print(f"  K range: [{K_min}, {K_max}]", file=sys.stderr)
     print(f"  dK = {dK} → {n_K} K values", file=sys.stderr)
     print(f"  steps_per_K = {steps_per_K}", file=sys.stderr)
     print(f"  Total steps: {total_steps}", file=sys.stderr)
     print(f"  Logging every {log_interval} steps → {total_steps // log_interval} data points", file=sys.stderr)
-    
+
     # Store previous state for velocity calculation
     # (Initialize with dummy values)
     prev_x = np.zeros(N)
     prev_y = np.zeros(N)
     prev_theta = np.zeros(N)
-    
+
     global_step = 0
-    
+
     with output_path.open("w", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()
-        
+
         for i_K, K in enumerate(K_values):
             # If independent, re-initialize swarm at each K
             if independent:
@@ -110,26 +110,26 @@ def run_ksweep(
             else:
                 # Set new K value (no re-initialization)
                 swarm.K = K
-            
+
             for t_at_K in range(steps_per_K):
                 # Evolve one step
                 swarm.step()
-                
+
                 # Log at intervals
                 if global_step % log_interval == 0:
                     # Compute order parameters
                     S = swarm._correlation_order_parameter()
                     R = swarm._synchrony_order_parameter()
-                    
+
                     # Need valid previous state for velocity
                     if t_at_K > 0:
                         V, omega = swarm._calculate_velocity_order_parameter(prev_x, prev_y, prev_theta)
                     else:
                         V, omega = 0.0, 0.0
-                    
+
                     # Get state classification
                     state, _, _, _, _, _, _, _, _ = swarm.stability_analysis()
-                    
+
                     writer.writerow({
                         "step": global_step,
                         "K": K,
@@ -140,20 +140,20 @@ def run_ksweep(
                         "omega": omega,
                         "state": state,
                     })
-                
+
                 # Update previous state
                 prev_x = swarm.x_pos.copy()
                 prev_y = swarm.y_pos.copy()
                 prev_theta = swarm.phases.copy()
-                
+
                 global_step += 1
-            
+
             # Progress update after each K value
             if (i_K + 1) % max(1, n_K // 10) == 0 or i_K == 0:
                 S = swarm._correlation_order_parameter()
                 R = swarm._synchrony_order_parameter()
                 print(f"  [{i_K+1}/{n_K}] K={K:.4f}, S={S:.3f}, R={R:.3f}", file=sys.stderr)
-    
+
     print(f"\nResults saved to: {output_path}", file=sys.stderr)
 
 
@@ -171,9 +171,9 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=42, help="Random seed")
     p.add_argument("--output", type=str, default="results/ksweep.csv", help="Output CSV path")
     p.add_argument("--independent", action="store_true", help="Re-initialize swarm for each K (removes hysteresis)")
-    
+
     args = p.parse_args()
-    
+
     run_ksweep(
         N=args.N,
         J=args.J,
