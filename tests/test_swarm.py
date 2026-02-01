@@ -56,13 +56,13 @@ class TestSwarmStep:
         """Test that step() modifies particle positions/phases."""
         np.random.seed(42)
         swarm = Swarm(N=50, dt=0.1, J=1.0, K=-0.5, steps=100)
-        
+
         x_before = swarm.x_pos.copy()
         y_before = swarm.y_pos.copy()
         theta_before = swarm.phases.copy()
-        
+
         swarm.step()
-        
+
         # At least some values should change (unless at equilibrium, which is unlikely)
         assert not np.allclose(swarm.x_pos, x_before) or \
                not np.allclose(swarm.y_pos, y_before) or \
@@ -72,15 +72,15 @@ class TestSwarmStep:
         """Test that Numba and naive implementations produce similar results."""
         np.random.seed(42)
         swarm_numba = Swarm(N=30, dt=0.1, J=1.0, K=-0.5, steps=100, use_numba=True)
-        
+
         np.random.seed(42)
         swarm_naive = Swarm(N=30, dt=0.1, J=1.0, K=-0.5, steps=100, use_numba=False)
-        
+
         # Run a few steps
         for _ in range(5):
             swarm_numba.step()
             swarm_naive.step()
-        
+
         # Results should be very close (not exact due to floating point)
         assert np.allclose(swarm_numba.x_pos, swarm_naive.x_pos, rtol=1e-5)
         assert np.allclose(swarm_numba.y_pos, swarm_naive.y_pos, rtol=1e-5)
@@ -108,9 +108,9 @@ class TestOrderParameters:
         x_prev = swarm.x_pos.copy()
         y_prev = swarm.y_pos.copy()
         theta_prev = swarm.phases.copy()
-        
+
         swarm.step()
-        
+
         V, omega = swarm._calculate_velocity_order_parameter(x_prev, y_prev, theta_prev)
         assert V >= 0
         assert omega >= 0
@@ -131,10 +131,10 @@ class TestStabilityAnalysis:
         """Test that stability_analysis returns expected tuple structure."""
         swarm = Swarm(N=50, dt=0.1, J=1.0, K=0.0, steps=100)
         result = swarm.stability_analysis()
-        
+
         assert isinstance(result, tuple)
         assert len(result) == 9
-        
+
         state, S, V, omega, R, best_k, best_sep, best_comp, best_aniso = result
         assert isinstance(state, str)
         assert isinstance(S, float)
