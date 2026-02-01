@@ -42,6 +42,13 @@ def run_ksweep(
         seed: Random seed for reproducibility
         output_path: Output CSV path
     """
+    # Parameter validation
+    assert N > 0, f"N must be positive, got {N}"
+    assert steps_per_K > 0, f"steps_per_K must be positive, got {steps_per_K}"
+    assert dt > 0, f"dt must be positive, got {dt}"
+    assert log_interval > 0, f"log_interval must be positive, got {log_interval}"
+    assert dK != 0, "dK cannot be zero"
+    
     np.random.seed(seed)
     
     # Generate K values (handles both forward and backward sweeps)
@@ -51,6 +58,7 @@ def run_ksweep(
         # Backward sweep: dK is negative, K_min > K_max
         K_values = np.arange(K_min, K_max + dK/2, dK)
     n_K = len(K_values)
+    assert n_K > 0, f"K sweep generated no values (K_min={K_min}, K_max={K_max}, dK={dK})"
     total_steps = n_K * steps_per_K
     
     # Initialize swarm (only once if not independent)

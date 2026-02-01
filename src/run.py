@@ -34,15 +34,9 @@ def save_final_state(
         state: State label returned by the stability analysis.
         log_path: Path to the CSV file to append to.
     """
-    # os.makedirs(SCRIPT_DIR / "final_states", exist_ok=True)
-    # plt.scatter(swarm.x_pos, swarm.y_pos, c=swarm.phases, cmap='hsv')
-    # plt.colorbar(label='Phase (theta)')
-    # plt.title(f'Swarmalator Final State (N={N}, J={J}, K={K}, seed={seed})')
-    # plt.xlabel('x')
-    # plt.ylabel('y')
-    # plt.savefig(f"final_states/swarmalator_N{N}_J{J}_K{K}_seed{seed}.png")
-    # plt.close()
-
+    assert N > 0, f"N must be positive, got {N}"
+    assert swarm.N == N, f"swarm.N ({swarm.N}) != N ({N})"
+    
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["J", "K", "N", "S", "V", "omega", "R", "state", "seed"]
@@ -96,6 +90,11 @@ def run_once(
     Returns:
         CSV string containing N, J, K, seed, R, S, V, omega, and state.
     """
+    assert N > 0, f"N must be positive, got {N}"
+    assert dt > 0, f"dt must be positive, got {dt}"
+    assert steps >= 0, f"steps must be non-negative, got {steps}"
+    assert sample_every > 0, f"sample_every must be positive, got {sample_every}"
+    
     np.random.seed(seed)
 
     # x = np.random.uniform(-1.0, 1.0, N)

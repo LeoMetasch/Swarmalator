@@ -152,6 +152,11 @@ class Swarm:
             predator: Whether a predator is present.
             hunting_strength: Strength of predator repulsion.
         """
+        # Input validation
+        assert isinstance(N, int) and N > 0, f"N must be positive integer, got {N}"
+        assert dt > 0, f"dt must be positive, got {dt}"
+        assert steps >= 0, f"steps must be non-negative, got {steps}"
+        assert hunting_strength >= 0, f"hunting_strength must be non-negative, got {hunting_strength}"
 
         self.N = N
         self.eps = 1e-12
@@ -178,6 +183,11 @@ class Swarm:
         else:
             self.vx = np.zeros(N)
             self.vy = np.zeros(N)
+
+        # Verify state arrays
+        assert self.phases.shape == (N,), f"phases shape mismatch: {self.phases.shape}"
+        assert self.x_pos.shape == (N,), f"x_pos shape mismatch: {self.x_pos.shape}"
+        assert self.y_pos.shape == (N,), f"y_pos shape mismatch: {self.y_pos.shape}"
 
         # Phase Coupling Parameters (Q)
         if self.phase_coupling:
@@ -378,7 +388,9 @@ class Swarm:
         W_minus = np.exp(1j*(phi - self.phases))
         S_plus = np.abs(W_plus.sum()/self.N)
         S_minus = np.abs(W_minus.sum()/self.N)
-        return max(S_plus, S_minus)
+        result = max(S_plus, S_minus)
+        assert 0 <= result <= 1, f"S order parameter out of bounds: {result}"
+        return result
 
     def _calculate_velocity_order_parameter(
         self,
@@ -398,6 +410,11 @@ class Swarm:
             V_mean (float): mean spatial velocity
             omega_mean (float): mean phase velocity
         """
+        # Verify input shapes match swarm size
+        assert x_prev.shape == (self.N,), f"x_prev shape {x_prev.shape} != ({self.N},)"
+        assert y_prev.shape == (self.N,), f"y_prev shape {y_prev.shape} != ({self.N},)"
+        assert theta_prev.shape == (self.N,), f"theta_prev shape {theta_prev.shape} != ({self.N},)"
+        
         ############ Spatial velocity (V) ####################################
         # Ensure input arrays are float/compatible
         dx = self.x_pos - x_prev
@@ -419,11 +436,16 @@ class Swarm:
         # Are the oscillators still oscillating?
         omega_mean = np.mean(omega_i)
 
+        assert V_mean >= 0, f"V_mean must be non-negative, got {V_mean}"
+        assert omega_mean >= 0, f"omega_mean must be non-negative, got {omega_mean}"
+
         return V_mean, omega_mean
 
     def _synchrony_order_parameter(self) -> float:
         """Calculate the Kuramoto order parameter R for the current phases."""
-        return float(np.abs(np.mean(np.exp(1j * self.phases))))
+        R = float(np.abs(np.mean(np.exp(1j * self.phases))))
+        assert 0 <= R <= 1, f"R order parameter out of bounds: {R}"
+        return R
 
     def _circular_kmeans_labels(
         self,
@@ -446,6 +468,9 @@ class Swarm:
         Returns:
             labels: Integer cluster labels in {0..k-1}, shape (N,).
         """
+        assert k >= 1, f"k must be at least 1, got {k}"
+        assert theta.shape[0] > 0, "theta array cannot be empty"
+        
         rng = np.random.default_rng(seed)
         X = np.c_[np.cos(theta), np.sin(theta)]  # (N,2) points on the unit circle
 
@@ -494,6 +519,8 @@ class Swarm:
         Returns:
             separation: Dimensionless separation score (>= 0).
         """
+        assert x.shape == y.shape == labels.shape, "x, y, labels shape mismatch"
+        
         k = int(labels.max()) + 1
         if k < 2:
             return 0.0

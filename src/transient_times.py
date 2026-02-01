@@ -28,6 +28,9 @@ def calculate_transient_times(
             - 'individual_times': Dict of convergence time per parameter
             - 'converged': Boolean if system converged
     """
+    assert window_size > 0, f"window_size must be positive, got {window_size}"
+    assert threshold > 0, f"threshold must be positive, got {threshold}"
+    
     df = pd.read_csv(csv_path)
     # STRIP WHITESPACE from columns to avoid KeyErrors
     df.columns = df.columns.str.strip()
@@ -152,6 +155,7 @@ def calculate_transient_time_mser(series: pd.Series) -> int:
     """
     values = series.values
     n = len(values)
+    assert n >= 0, f"Series length must be non-negative, got {n}"
     if n < 10:
         return 0
 

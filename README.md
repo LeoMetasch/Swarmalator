@@ -97,6 +97,34 @@ pip install pdoc  # if not installed
 pdoc src hpc -o docs
 ```
 
+## Testing
+
+The project includes a comprehensive test suite using [pytest](https://pytest.org/).
+
+### Run Tests
+
+```bash
+pip install pytest  # if not installed
+pytest .            # run all tests
+pytest . -v         # verbose output
+pytest . -x         # stop on first failure
+```
+
+### Test Coverage
+
+| Module | Tests | Coverage |
+|--------|-------|----------|
+| `src/swarm.py` | 20 | Initialization, stepping, order parameters, stability analysis |
+| `src/run.py` | 7 | Parameter validation, determinism, CSV output format |
+
+Tests verify:
+
+- Parameter validation via assertions
+- Array shape correctness
+- Order parameter bounds (S, R ∈ [0,1])
+- Numba vs naive implementation consistency
+- Deterministic seeding behavior
+
 ## Usage Examples
 
 The core simulation is controlled via the `src/run.py` CLI.
