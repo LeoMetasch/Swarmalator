@@ -68,7 +68,11 @@ pip install .
 
 API documentation is auto-generated from docstrings using [pdoc](https://pdoc.dev/).
 
-### View Documentation
+### View Online (Recommended)
+
+📖 **[View API Documentation](https://leopoldfajardo.github.io/Swarmalator/)**
+
+### View Locally
 
 Open the pre-generated docs directly:
 
@@ -80,13 +84,12 @@ start docs\index.html
 open docs/index.html
 ```
 
-Or launch a live server with auto-refresh:
+Or launch a live development server:
 
 ```bash
 pdoc src hpc
+# Opens at http://localhost:8080
 ```
-
-This opens at <http://localhost:8080>
 
 ### Regenerate Documentation
 
