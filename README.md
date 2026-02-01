@@ -211,7 +211,9 @@ The core Python implementation of the Swarmalator model.
 - **Intermediate Logs**: `run.py` writes snapshot logs (every `--sample_every` steps) to `src/logs/`.
   - Format: `temp_N{N}_J{J}_K{K}_seed{seed}.csv`
 - **Final States**: Summaries of the final simulation state (order parameters, cluster diagnostics) are appended to CSV files (e.g., `test.csv` or as configured in scripts).
-- **Analysis Results**: Analysis scripts generally write processed data and figures to `src/results/` or specific subdirectories like `results/hunting_strength/`.
+- **Plots**: Generated visualizations (heatmaps, phase diagrams, order parameter plots) are saved to `plots/`.
+- **Results Data**: Processed analysis results (transient times, aggregated statistics) are saved to `results_data/`.
+- **Analysis Results**: Analysis scripts may also write to specific subdirectories like `results/hunting_strength/`.
 
 ---
 
