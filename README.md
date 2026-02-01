@@ -70,7 +70,7 @@ API documentation is auto-generated from docstrings using [pdoc](https://pdoc.de
 
 ### View Online (Recommended)
 
-📖 **[View API Documentation](https://leopoldfajardo.github.io/Swarmalator/)**
+📖 **[View API Documentation](https://leometasch.github.io/Swarmalator/index.html)**
 
 ### View Locally
 
