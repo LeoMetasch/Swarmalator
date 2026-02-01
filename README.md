@@ -6,16 +6,14 @@
 
 - Swarmalators with variable phase coupling strength
 - Swarmalators with variable internal phase change rates
-- Swarmalators with intirsic movement based on internal phase change 
-- Predator implementation with varbiable hunting strengh 
-
-
+- Swarmalators with intirsic movement based on internal phase change
+- Predator implementation with varbiable hunting strengh
 
 ## Project Summary
+
 **Computational study of coupled oscillators that sync and swarm**
 
 Implementation based on the model by O'Keeffe et al. (2017): [Oscillators that sync and swarm](https://www.nature.com/articles/s41467-017-01190-3)
-
 
 ## Overview
 
@@ -27,6 +25,7 @@ Swarmalators are particles that exhibit both collective swarming (spatial attrac
 - **Order parameter tracking**: Correlation (S), synchrony (R), spatial velocity (V), phase velocity (Ω)
 
 The system exhibits diverse collective states depending on coupling parameters J (spatial) and K (phase):
+
 - **Static Sync**: Synchronized phases, stationary cluster
 - **Static Async**: Unsynchronized phases, stationary cluster  
 - **Active/Static Phase Wave**: Correlated spatial-phase patterns
@@ -35,7 +34,9 @@ The system exhibits diverse collective states depending on coupling parameters J
 ![alt text](image.png)
 
 ## Quick Start
+
 Instead of a requirements.txt file, this project uses `uv` to manage dependencies. See pyproject.toml for details.
+
 ```bash
 uv venv 
 uv sync
@@ -43,9 +44,10 @@ source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate on Windows
 ```
 
-Instead of a requirements.txt file, this project uses `uv` to manage dependencies. 
+Instead of a requirements.txt file, this project uses `uv` to manage dependencies.
 
 ## Logging Order Parameters
+
 - Run `python main.py` to execute a sample experiment
 - Order-parameter snapshots are written to `logs/experiment_log.csv` with columns: step, S, V, omega, R, J, K, N
 - Adjust parameters in `main.py` (see `run_experiment`) for custom sweeps
@@ -55,6 +57,7 @@ Instead of a requirements.txt file, this project uses `uv` to manage dependencie
 ## AI Usage
 
 This project was developed with assistance from AI tools:
+
 - **Code refactoring**: Claude assisted in simplifying analysis scripts to remove verbose AI-generated patterns
 - **Documentation**: AI helped generate docstrings, README structure, and usage examples
 - **Analysis implementation**: Statistical testing frameworks and critical exponent extraction methods were developed collaboratively
@@ -65,6 +68,27 @@ All code has been manually reviewed and tested. The core physics implementation 
 
 ## Directory Structure
 
+### `src/` - Core Simulation Library
+
+The core Python implementation of the Swarmalator model.
+
+| File | Description |
+| --- | --- |
+| `swarm.py` | Main `Swarm` class implementing the physics engine. Supports optional Numba acceleration for $O(N)$ predator dynamics and optimized $O(N^2)$ pairwise interactions. |
+| `run.py` | CLI entry point for running simulations. Supports single runs and parameter sweeps using multiprocessing. |
+| `plots.py` | Utilities for generating heatmaps, phase diagrams, and order parameter plots. |
+| `benchmark.py` | Performance testing script comparing NumPy vs. Numba implementations. |
+| `transient_times.py` | Analysis script for calculating relaxation times to stable states. |
+
+**Logging & Outputs:**
+
+- **Intermediate Logs**: `run.py` writes snapshot logs (every `--sample_every` steps) to `src/logs/`.
+  - Format: `temp_N{N}_J{J}_K{K}_seed{seed}.csv`
+- **Final States**: Summaries of the final simulation state (order parameters, cluster diagnostics) are appended to CSV files (e.g., `test.csv` or as configured in scripts).
+- **Analysis Results**: Analysis scripts generally write processed data and figures to `src/results/` or specific subdirectories like `results/hunting_strength/`.
+
+---
+
 ### `hpc/` - High Performance Computing Simulations
 
 Scripts for running parameter sweeps and phase transition analysis on HPC clusters.
@@ -72,6 +96,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 > **Note on Data Storage**: These scripts are designed for Snellius HPC cluster submission. Full experimental runs generate datasets exceeding 1 GB, which cannot be uploaded to GitHub (even with LFS). Results are stored locally in `hpc/results/` (which is gitignored).
 
 **Simulation Runners:**
+
 | File | Description |
 |------|-------------|
 | `run.py` | Parallel J/K parameter sweep with multiprocessing |
@@ -80,6 +105,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 | `swarm.py` | Core Swarmalator model with Numba acceleration |
 
 **Analysis Scripts (`hpc/analysis/`):**
+
 | File | Description |
 |------|-------------|
 | `analyze_beta.py` | Extract critical exponent β via log-log regression |
@@ -87,6 +113,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 | `analyze_hysteresis.py` | Compare forward/backward sweeps for hysteresis loops |
 
 **HPC Job Scripts (`hpc/scripts/`):**
+
 | File | Description |
 |------|-------------|
 | `submit_sweep.sh` | SLURM script for parameter sweeps |
@@ -161,6 +188,7 @@ python hpc/analysis/analyze_hysteresis.py \
 ```
 
 **Output files:**
+
 - Analysis scripts generate: `*.png` (plots), `*.csv` (statistics), `*.json` (fitted parameters)
 - All outputs saved to respective `--output_dir` directories
 
@@ -177,6 +205,7 @@ Browser-based interactive swarmalator simulation.
 | `style.css` | Styling for the demo interface |
 
 **Features:**
+
 - Real-time visualization of swarmalator dynamics
 - Adjustable parameters: J (spatial coupling), K (phase coupling), N (particle count)
 - Order parameter plots: S (correlation), V (velocity), Ω (phase velocity), R (synchrony)
@@ -184,6 +213,7 @@ Browser-based interactive swarmalator simulation.
 - Predator mode: click to spawn, right-click to remove
 
 **To run:**
+
 ```bash
 # Option 1: Open directly
 open demo/index.html
