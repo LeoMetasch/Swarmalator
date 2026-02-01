@@ -168,8 +168,8 @@ python -m src.run \
 The file `N200_30_seed.csv` (37 MB) contains results from a comprehensive J-K parameter sweep on Snellius HPC cluster:
 
 - **N = 200** swarmalators
-- **J**: 0.0 to 1.0 (step 0.1)
-- **K**: -1.0 to 0.0 (step 0.1)
+- **J**: 0.0 to 1.0 (step 0.01)
+- **K**: -0.8 to 0.2 (step 0.01)
 - **30 seeds** per (J, K) combination
 - Columns: `N, J, K, seed, R, S, V, omega, state`
 
