@@ -203,4 +203,4 @@ This project was developed with assistance from AI tools Claude/Gemini for:
 - **Documentation**: README structure and code comments
 - **Interactive demo**: Help with the JavaScript implementation of the web-based visualization and UI design
 
-AI has not been used for any scientific analysis or data interpretation (except for minor code refactoring). All code has been manually strucured, reviewed and tested. The simulation implementation and experiments are self implemented.
+AI has not been used for any scientific analysis or data interpretation (except for code refactoring). All code has been manually strucured, reviewed and tested. The simulation implementation and experiments are self implemented.
