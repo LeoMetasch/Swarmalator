@@ -163,6 +163,18 @@ python -m src.run \
 - The script prints CSV-formatted results to stdout, which can be redirected to a file (e.g., `sweep_results.csv`).
 - Individual simulation logs (snapshots) are saved to `src/logs/`.
 
+**Pre-computed Dataset:**
+
+The file `N200_30_seed.csv` (37 MB) contains results from a comprehensive J-K parameter sweep on Snellius HPC cluster:
+
+- **N = 200** swarmalators
+- **J**: 0.0 to 1.0 (step 0.1)
+- **K**: -1.0 to 0.0 (step 0.1)
+- **30 seeds** per (J, K) combination
+- Columns: `N, J, K, seed, R, S, V, omega, state`
+
+This dataset is used by plotting functions in `src/plots.py` for generating phase diagrams and heatmaps.
+
 ### 3. Quick Demo
 
 To run a pre-configured demo simulation with animation:
