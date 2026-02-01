@@ -33,9 +33,9 @@ The system exhibits diverse collective states depending on coupling parameters J
 
 ![alt text](image.png)
 
-## Quick Start
+## Installation
 
-Instead of a requirements.txt file, this project uses `uv` to manage dependencies. See pyproject.toml for details.
+Instead of a `requirements.txt` file, this project uses `uv` to manage dependencies. See `pyproject.toml` for details.
 
 ```bash
 uv venv 
@@ -44,13 +44,51 @@ source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate on Windows
 ```
 
-Instead of a requirements.txt file, this project uses `uv` to manage dependencies.
+## Usage Examples
 
-## Logging Order Parameters
+The core simulation is controlled via the `src/run.py` CLI.
 
-- Run `python main.py` to execute a sample experiment
-- Order-parameter snapshots are written to `logs/experiment_log.csv` with columns: step, S, V, omega, R, J, K, N
-- Adjust parameters in `main.py` (see `run_experiment`) for custom sweeps
+### 1. Run a Single Simulation
+
+Run a simulation with specific parameters and save the final state order parameters to `test.csv`.
+
+```bash
+python -m src.run --N 500 --J 1.0 --K -0.5 --dt 0.1 --steps 5000 --seed 42
+```
+
+**Output:**
+
+- Prints final order parameters to stdout.
+- Appends final state summary to `test.csv`.
+- Saves trajectory snapshots (if `--sample_every` is set) to `src/logs/temp_N500_J1.0_K-0.5_seed42.csv`.
+
+### 2. Parameter Sweep
+
+Run a parallel parameter sweep over J and K.
+
+```bash
+# Sweep J from 0.5 to 1.0 and K from -1.0 to 0.5 with 4 parallel workers
+python -m src.run \
+  --sweep \
+  --N 200 \
+  --Jmin 0.5 --Jmax 1.0 --Jsteps 10 \
+  --Kmin -1.0 --Kmax 0.5 --Ksteps 10 \
+  --workers 4 \
+  > sweep_results.csv
+```
+
+**Output:**
+
+- The script prints CSV-formatted results to stdout, which can be redirected to a file (e.g., `sweep_results.csv`).
+- Individual simulation logs (snapshots) are saved to `src/logs/`.
+
+### 3. Quick Demo
+
+To run a pre-configured demo simulation with animation:
+
+```bash
+python main.py
+```
 
 ---
 
@@ -98,7 +136,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 **Simulation Runners:**
 
 | File | Description |
-|------|-------------|
+| --- | --- |
 | `run.py` | Parallel J/K parameter sweep with multiprocessing |
 | `run_ksweep.py` | Continuous K-sweep for observing phase transitions |
 | `run_hysteresis.py` | Forward + backward sweeps to detect hysteresis |
@@ -107,7 +145,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 **Analysis Scripts (`hpc/analysis/`):**
 
 | File | Description |
-|------|-------------|
+| --- | --- |
 | `analyze_beta.py` | Extract critical exponent β via log-log regression |
 | `analyze_fss.py` | Finite-size scaling analysis for critical exponents |
 | `analyze_hysteresis.py` | Compare forward/backward sweeps for hysteresis loops |
@@ -115,7 +153,7 @@ Scripts for running parameter sweeps and phase transition analysis on HPC cluste
 **HPC Job Scripts (`hpc/scripts/`):**
 
 | File | Description |
-|------|-------------|
+| --- | --- |
 | `submit_sweep.sh` | SLURM script for parameter sweeps |
 | `submit_ksweep.sh` | SLURM script for K-sweep experiments |
 | `submit_hysteresis.sh` | SLURM script for hysteresis runs |
